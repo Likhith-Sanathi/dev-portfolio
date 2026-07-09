@@ -78,7 +78,7 @@ const Logos3 = ({
   return (
     <section
       className={cn(
-        "w-full oled-panel rounded-[2rem] border border-white/10 p-4 md:p-5",
+        "w-[calc(100vw-2rem)] max-w-full md:w-full oled-panel rounded-[2rem] border border-white/10 p-4 md:p-5",
         className,
       )}
     >
@@ -107,8 +107,6 @@ const Logos3 = ({
             ))}
           </CarouselContent>
         </Carousel>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent" />
       </div>
     </section>
   );

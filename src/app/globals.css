@@ -138,7 +138,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    zoom: 75%;
     text-rendering: geometricPrecision;
   }
   html {

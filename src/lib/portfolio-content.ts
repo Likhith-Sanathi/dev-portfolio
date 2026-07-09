@@ -3,7 +3,7 @@ export const portfolio = {
   role: "Computer Science student and software engineer",
   location: "Cork, Ireland",
   email: "likhithsanathi@gmail.com",
-  availability: "Open to internships in systems, AI, and software engineering",
+  availability: "Open to internships in AI, and software engineering",
   headline: "Likhith Sanathi.",
   hero:
     "I build production-minded software across AI tooling, Full-stack, quantitative ML, terminal systems, and verification workflows.",
