@@ -183,7 +183,7 @@ function AboutSection() {
     <section id="about" className="mx-auto max-w-6xl px-4 py-24 md:px-6">
       <div className="relative">
         <Hover3D>
-          <div className="hover-3d-surface oled-panel relative overflow-hidden rounded-[2.5rem] p-6 text-foreground md:p-10">
+          <div className="hover-3d-surface oled-panel relative overflow-hidden rounded-[2.5rem] px-4 py-6 text-foreground sm:px-6 md:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.14),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.06),transparent_30%)]" />
           <div className="scanlines absolute inset-0 opacity-20" />
           <div className="relative grid gap-10 lg:grid-cols-2 lg:items-stretch lg:gap-4">
