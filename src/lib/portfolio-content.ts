@@ -34,7 +34,6 @@ export const portfolio = {
       period: "Sep 2024 - May 2028",
       coursework: [
         "Algorithms & Data Structures",
-        "Computer Systems",
         "Operating Systems",
         "Networking",
         "Relational Databases",
