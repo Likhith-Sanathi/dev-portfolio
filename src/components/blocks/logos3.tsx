@@ -1,14 +1,15 @@
 "use client";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AutoScroll from "embla-carousel-auto-scroll";
 
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import type { SkillLogo } from "@/lib/skill-logos";
+import { skillLabelsToLogos, type SkillLogo } from "@/lib/skill-logos";
 import { cn } from "@/lib/utils";
 
 interface Logos3Props {
   heading?: string;
-  logos?: SkillLogo[];
+  skills?: readonly string[];
   className?: string;
   direction?: "forward" | "backward";
 }
@@ -28,25 +29,51 @@ function buildLoopingLogos(logos: SkillLogo[]) {
 }
 
 function LogoMark({ logo }: { logo: SkillLogo }) {
+  const iconStyle = {
+    transform: `scale(${logo.scale ?? 1})`,
+    transformOrigin: "center",
+  } as const;
+
+  if (logo.icon.kind === "simple") {
+    return (
+      <span className="flex size-12 shrink-0 items-center justify-center">
+        <svg
+          viewBox="0 0 24 24"
+          role="img"
+          aria-label={logo.description}
+          className="size-8 text-white"
+          fill="currentColor"
+          preserveAspectRatio="xMidYMid meet"
+          style={iconStyle}
+        >
+          <title>{logo.description}</title>
+          <path d={logo.icon.icon.path} />
+        </svg>
+      </span>
+    );
+  }
+
   return (
-    <svg
-      viewBox="0 0 24 24"
-      role="img"
-      aria-label={logo.description}
-      className="h-10 w-10 shrink-0 text-white"
-    >
-      <path fill="currentColor" d={logo.icon.path} />
-    </svg>
+    <span className="flex size-12 shrink-0 items-center justify-center">
+      <FontAwesomeIcon
+        icon={logo.icon.icon}
+        title={logo.description}
+        aria-label={logo.description}
+        fixedWidth
+        className="size-8 text-white"
+        style={iconStyle}
+      />
+    </span>
   );
 }
 
 const Logos3 = ({
   heading = "Trusted by these companies",
-  logos = [],
+  skills = [],
   className,
   direction = "forward",
 }: Logos3Props) => {
-  const loopingLogos = buildLoopingLogos(logos);
+  const loopingLogos = buildLoopingLogos(skillLabelsToLogos(skills));
 
   return (
     <section

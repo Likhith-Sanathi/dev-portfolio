@@ -21,7 +21,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { LayeredPanel } from "@/components/ui/layered-panel";
 import { Separator } from "@/components/ui/separator";
 import { portfolio } from "@/lib/portfolio-content";
-import { skillLabelsToLogos } from "@/lib/skill-logos";
 
 const socialIcons = {
   GitHub: Terminal,
@@ -438,7 +437,7 @@ function ProjectsSection() {
 function SkillsSection() {
   const skillRails = portfolio.skillGroups.map((group) => ({
     heading: group.title,
-    logos: skillLabelsToLogos(group.items),
+    skills: group.items,
   }));
 
   return (
@@ -461,7 +460,7 @@ function SkillsSection() {
             <Reveal key={row.heading} delay={index * 0.08} variant="rise">
               <Logos3
                 heading={row.heading}
-                logos={row.logos}
+                skills={row.skills}
                 className="lg:max-w-2xl xl:max-w-3xl"
                 direction={index % 2 === 1 ? "backward" : "forward"}
               />
