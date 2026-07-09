@@ -1,0 +1,14 @@
+import {
+  createSocialImageResponse,
+  socialImageAlt,
+  socialImageContentType,
+  socialImageSize,
+} from "@/app/social-image";
+
+export const alt = socialImageAlt;
+export const size = socialImageSize;
+export const contentType = socialImageContentType;
+
+export default async function TwitterImage() {
+  return createSocialImageResponse();
+}
