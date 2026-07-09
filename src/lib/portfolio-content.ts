@@ -8,7 +8,7 @@ export const portfolio = {
   hero:
     "I build production-minded software across AI tooling, Full-stack, quantitative ML, terminal systems, and verification workflows.",
   summary:
-    "3rd year Computer Science student at University College Cork, building across IC verification, full-stack development, autonomous coding systems, quant trading research, and competitive cybersecurity with an insatiable habit of picking up new domains just to see how they work.",
+    "3rd year Computer Science student at University College Cork, building across full-stack development, agentic systems, and competitive cybersecurity.",
   socials: [
     { label: "GitHub", href: "https://github.com/Likhith-Sanathi?tab=repositories" },
     { label: "LinkedIn", href: "https://www.linkedin.com/in/likhith-sanathi/" },
