@@ -482,7 +482,7 @@ function ContactSection() {
       <Reveal variant="blast">
         <Hover3D>
           <LayeredPanel className="hover-3d-surface rounded-[2.5rem] p-6 text-foreground md:p-10">
-            <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+            <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
               <div>
                 <p className="font-code text-sm uppercase tracking-[0.36em] text-white/82">
                   Contact me
@@ -492,40 +492,38 @@ function ContactSection() {
                   className="mt-5 max-w-4xl text-5xl tracking-[-0.06em] md:text-7xl"
                 />
               </div>
-              <div className="space-y-5">
+              <div className="inline-grid grid-cols-[repeat(3,max-content)] gap-3 justify-self-center lg:justify-self-end">
                 <Button
                   asChild
-                  className="h-12 w-full rounded-full bg-white px-6 text-base text-black shadow-[0_0_34px_rgba(255,255,255,0.28)] transition-transform duration-200 ease-out hover:scale-[1.01] hover:bg-white/90 sm:w-auto"
+                  className="col-span-3 h-12 w-full justify-center rounded-full bg-white px-6 text-base text-black shadow-[0_0_34px_rgba(255,255,255,0.28)] transition-transform duration-200 ease-out hover:scale-[1.01] hover:bg-white/90"
                 >
                   <a href={`mailto:${portfolio.email}`}>
                     <Send />
                     Start a conversation
                   </a>
                 </Button>
-                <div className="flex flex-wrap gap-3">
-                  {portfolio.socials.map((social) => {
-                    const Icon =
-                      socialIcons[social.label as keyof typeof socialIcons] ??
-                      ArrowUpRight;
+                {portfolio.socials.map((social) => {
+                  const Icon =
+                    socialIcons[social.label as keyof typeof socialIcons] ??
+                    ArrowUpRight;
 
-                    return (
-                      <a
-                        key={social.label}
-                        href={social.href}
-                        target={social.href.startsWith("mailto:") ? undefined : "_blank"}
-                        rel={
-                          social.href.startsWith("mailto:")
-                            ? undefined
-                            : "noopener noreferrer"
-                        }
-                        className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-sm transition-colors duration-200 ease-out hover:border-white/30 hover:bg-white/[0.12]"
-                      >
-                        <Icon className="size-4" />
-                        {social.label}
-                      </a>
-                    );
-                  })}
-                </div>
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target={social.href.startsWith("mailto:") ? undefined : "_blank"}
+                      rel={
+                        social.href.startsWith("mailto:")
+                          ? undefined
+                          : "noopener noreferrer"
+                      }
+                      className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-sm transition-colors duration-200 ease-out hover:border-white/30 hover:bg-white/[0.12]"
+                    >
+                      <Icon className="size-4" />
+                      {social.label}
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </LayeredPanel>
