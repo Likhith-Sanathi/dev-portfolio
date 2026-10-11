@@ -6,8 +6,11 @@ import { cn } from "@/lib/utils";
 
 export function BackgroundPaperShaders({
   className,
+  maxPixelCount,
 }: {
   className?: string;
+  /** Caps the shader's render resolution; the blur hides the lower detail. */
+  maxPixelCount?: number;
 }) {
   return (
     <div
@@ -20,6 +23,7 @@ export function BackgroundPaperShaders({
       <MeshGradient
         className="absolute inset-0 h-full w-full scale-[1.1] blur-2xl opacity-78"
         colors={["#000000", "#1a1a1a", "#333333", "#ffffff"]}
+        maxPixelCount={maxPixelCount}
       />
       <div className="absolute inset-0 bg-black/48" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_26%,rgba(0,0,0,0.62)_100%)]" />

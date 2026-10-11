@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   ArrowUpRight,
   Mail,
@@ -522,6 +523,13 @@ function ContactSection() {
       </Reveal>
       <footer className="flex flex-col gap-3 px-2 py-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
         <span>© 2026 {portfolio.name}. Built with Next.js and Motion.</span>
+        <Link
+          href="/reel"
+          className="inline-flex items-center gap-1 transition-colors duration-200 ease-out hover:text-foreground"
+        >
+          Watch the reel
+          <ArrowUpRight className="size-3.5" />
+        </Link>
       </footer>
     </section>
   );

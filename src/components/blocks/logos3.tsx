@@ -112,4 +112,4 @@ const Logos3 = ({
   );
 };
 
-export { Logos3 };
+export { Logos3, LogoMark };

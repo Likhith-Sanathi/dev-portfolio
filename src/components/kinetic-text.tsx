@@ -9,14 +9,25 @@ export function KineticText({
   as = "h2",
   className,
   delay = 0,
+  trigger = "inView",
 }: {
   text: string;
   as?: "h1" | "h2" | "h3";
   className?: string;
   delay?: number;
+  trigger?: "inView" | "mount";
 }) {
   const shouldReduceMotion = useReducedMotion();
   const Component = as;
+  const shown = shouldReduceMotion
+    ? undefined
+    : {
+        y: "0em",
+        rotateX: 0,
+        rotateZ: 0,
+        scale: 1,
+        opacity: 1,
+      };
 
   return (
     <Component
@@ -45,17 +56,8 @@ export function KineticText({
                     opacity: 0,
                   }
             }
-            whileInView={
-              shouldReduceMotion
-                ? undefined
-                : {
-                    y: "0em",
-                    rotateX: 0,
-                    rotateZ: 0,
-                    scale: 1,
-                    opacity: 1,
-                  }
-            }
+            animate={trigger === "mount" ? shown : undefined}
+            whileInView={trigger === "inView" ? shown : undefined}
             viewport={{ once: true, margin: "-14% 0px -14% 0px" }}
             transition={{
               duration: 0.62,
