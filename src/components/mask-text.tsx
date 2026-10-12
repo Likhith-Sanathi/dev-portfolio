@@ -45,9 +45,11 @@ export function MaskText({
       {pieces.map((piece, index) => (
         <Fragment key={index}>
           {!isLines && index > 0 ? " " : null}
+          {/* Clipped top and bottom only: the slide is vertical, and the
+              tight tracking lets a word's last letter reach past its slot. */}
           <span
             className={cn(
-              "-my-[0.1em] overflow-hidden py-[0.1em]",
+              "-my-[0.1em] overflow-y-clip py-[0.1em]",
               isLines ? "block" : "inline-block align-bottom",
             )}
           >

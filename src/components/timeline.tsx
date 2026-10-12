@@ -210,9 +210,11 @@ function RollingYear({
   return (
     <span className={cn("flex leading-[0.85] tabular-nums", className)}>
       {year.split("").map((digit, index) => (
+        // Clipped top and bottom only, to mask the roll: the tight tracking
+        // lets a round digit's edge reach past the right of its slot.
         <span
           key={index}
-          className="relative -my-[0.06em] inline-block overflow-hidden py-[0.06em]"
+          className="relative -my-[0.06em] inline-block overflow-y-clip py-[0.06em]"
         >
           <AnimatePresence
             mode="popLayout"

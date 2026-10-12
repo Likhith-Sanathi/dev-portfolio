@@ -57,11 +57,13 @@ export function FooterReveal({
         <div className={cn(frame, "@container pb-4 pt-6 md:pb-6 md:pt-8")}>
           <p className="-ml-[0.06em] whitespace-nowrap text-[length:calc(100cqw/3.4)] font-semibold leading-[0.8] tracking-[-0.065em] md:text-[length:calc(100cqw/6.45)]">
             <span className="sr-only">{name}</span>
-            <span aria-hidden="true" className="block overflow-hidden md:inline-block">
+            {/* Clipped top and bottom only, so the rising letters are masked
+                without shaving the edge off the last one. */}
+            <span aria-hidden="true" className="block overflow-y-clip md:inline-block">
               {line(first)}
             </span>
             <span aria-hidden="true"> </span>
-            <span aria-hidden="true" className="block overflow-hidden md:inline-block">
+            <span aria-hidden="true" className="block overflow-y-clip md:inline-block">
               {line(last)}
               <span className="relative ml-[0.035em] inline-block size-[0.145em]">
                 <motion.span
