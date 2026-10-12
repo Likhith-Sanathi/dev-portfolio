@@ -2,9 +2,9 @@ import { useSyncExternalStore } from "react";
 
 import { THEME_STORAGE_KEY } from "@/lib/preference-script";
 
-// Light is the default; dark is a choice made with the on-page toggle and
+// Dark is the default; light is a choice made with the on-page toggle and
 // remembered. It lives on <html data-theme> so CSS and JS share one source of
-// truth; a saved choice is applied before hydration by preference-script.ts.
+// truth; the choice is applied before hydration by preference-script.ts.
 
 export const THEME_EVENT = "themepreference";
 
@@ -18,11 +18,11 @@ function subscribe(onChange: () => void) {
 }
 
 function currentTheme(): Theme {
-  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
 export function useTheme() {
-  return useSyncExternalStore(subscribe, currentTheme, (): Theme => "light");
+  return useSyncExternalStore(subscribe, currentTheme, (): Theme => "dark");
 }
 
 export function setTheme(theme: Theme) {
