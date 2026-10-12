@@ -10,10 +10,6 @@ import {
 } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import { PortalNumeral } from "@/components/portal-numeral";
-import { ProjectPoster } from "@/components/project-poster";
-import { useLean } from "@/components/scroll-velocity";
-import { SplitFlap } from "@/components/split-flap";
 import type { portfolio } from "@/lib/portfolio-content";
 import { useCalm } from "@/lib/motion-preference";
 import { useMediaQuery } from "@/lib/use-media-query";
@@ -21,10 +17,9 @@ import { cn, pad } from "@/lib/utils";
 
 type Project = (typeof portfolio.projects)[number];
 
-// The reader first flies through a giant "02" cut out of the page, then
-// vertical scroll drives a pinned horizontal track of project panels, each
-// with a layered poster that comes apart in depth as it moves. Falls back to
-// a plain vertical list for calm visitors and very short screens.
+// Vertical scroll drives a pinned horizontal track of project panels, with a
+// giant index numeral behind each panel moving at its own speed. Falls back
+// to a plain vertical list for calm visitors and very short screens.
 export function HorizontalGallery({
   projects,
 }: {
@@ -35,9 +30,7 @@ export function HorizontalGallery({
   const enabled = tallEnough && !calm;
   const runwayRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLOListElement>(null);
-  // distance: sideways travel; panel: one panel's width; portal: the scroll
-  // spent flying through the numeral before the track starts to move.
-  const [metrics, setMetrics] = useState({ distance: 0, panel: 0, portal: 0 });
+  const [metrics, setMetrics] = useState({ distance: 0, panel: 0 });
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -54,7 +47,6 @@ export function HorizontalGallery({
           track.scrollWidth - document.documentElement.clientWidth,
         ),
         panel: first?.offsetWidth ?? 0,
-        portal: Math.round(window.innerHeight * 0.9),
       });
     });
     observer.observe(track);
@@ -66,20 +58,11 @@ export function HorizontalGallery({
     target: runwayRef,
     offset: ["start 56px", "end end"],
   });
-  const runway = metrics.portal + metrics.distance;
-  const portal = useTransform(scrollYProgress, (value) =>
-    metrics.portal ? Math.min(1, (value * runway) / metrics.portal) : 0,
-  );
-  const travel = useTransform(scrollYProgress, (value) =>
-    metrics.distance
-      ? Math.min(1, Math.max(0, (value * runway - metrics.portal) / metrics.distance))
-      : 0,
-  );
-  const x = useTransform(travel, (value) =>
+  const x = useTransform(scrollYProgress, (value) =>
     enabled ? -value * metrics.distance : 0,
   );
 
-  useMotionValueEvent(travel, "change", (value) => {
+  useMotionValueEvent(scrollYProgress, "change", (value) => {
     setActive(Math.round(value * (projects.length - 1)));
   });
 
@@ -89,7 +72,7 @@ export function HorizontalGallery({
       className="relative"
       style={
         enabled
-          ? { height: `calc(100svh - 3.5rem + ${runway}px)` }
+          ? { height: `calc(100svh - 3.5rem + ${metrics.distance}px)` }
           : undefined
       }
     >
@@ -101,7 +84,7 @@ export function HorizontalGallery({
               id={`project-${pad(index + 1)}`}
               aria-hidden="true"
               className="absolute left-0"
-              style={{ top: metrics.portal + index * metrics.panel }}
+              style={{ top: index * metrics.panel }}
             />
           ))
         : null}
@@ -135,26 +118,17 @@ export function HorizontalGallery({
         </motion.ol>
 
         {enabled ? (
-          <PortalNumeral
-            text="02"
-            label={`${projects.length} projects`}
-            progress={portal}
-          />
-        ) : null}
-
-        {enabled ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-5 md:px-8 lg:px-10">
             <div className="flex items-center justify-between text-sm">
               <span>Selected projects</span>
-              <span className="flex items-center gap-1.5 tabular-nums text-mute">
-                <SplitFlap value={pad(active + 1)} cellClassName="bg-ink text-paper" />
-                / {pad(projects.length)}
+              <span className="tabular-nums text-mute">
+                {pad(active + 1)} / {pad(projects.length)}
               </span>
             </div>
             <div className="relative mt-3 h-px bg-hairline">
               <motion.div
                 className="absolute inset-x-0 -top-px h-[3px] origin-left bg-signal"
-                style={{ scaleX: travel }}
+                style={{ scaleX: scrollYProgress }}
               />
             </div>
           </div>
@@ -177,31 +151,15 @@ function Panel({
   trackX: MotionValue<number>;
   panelWidth: number;
 }) {
-  // How far the panel is from its resting place at the left, in panel widths.
-  const drift = useTransform(trackX, (value) =>
-    horizontal && panelWidth
-      ? Math.max(-1.2, Math.min(1.2, (index * panelWidth + value) / panelWidth))
-      : 0,
-  );
-  const skewX = useLean(6);
-  // Panels swing in like doors hinged on their left edge, flat by the time
-  // they reach the left of the screen.
-  const rotateY = useTransform(trackX, (value) => {
-    if (!horizontal || panelWidth === 0) {
-      return 0;
-    }
-    const position = (index * panelWidth + value) / (panelWidth * 1.15);
-    return -Math.min(1, Math.max(0, position)) * 52;
-  });
-  const transformPerspective = useTransform(rotateY, (value) =>
-    Math.abs(value) < 0.05 ? 0 : 1600,
+  // The numeral outruns its panel by half again, so it races in from the right
+  // as the panel arrives and is clipped away while it leaves.
+  const numeralX = useTransform(trackX, (value) =>
+    horizontal ? (index * panelWidth + value) * 0.5 : 0,
   );
 
   return (
-    <motion.li
+    <li
       id={horizontal ? undefined : `project-${pad(index + 1)}`}
-      data-parallax
-      style={{ rotateY, transformPerspective, skewX, originX: 0 }}
       className={cn(
         "relative",
         horizontal
@@ -210,12 +168,13 @@ function Panel({
       )}
     >
       {horizontal ? (
-        <ProjectPoster
-          index={index}
-          number={pad(index + 1)}
-          drift={drift}
-          className="pointer-events-none absolute right-5 top-14 size-[min(26svh,44vw)] md:right-8 md:size-[min(36svh,26vw)]"
-        />
+        <motion.span
+          aria-hidden="true"
+          style={{ x: numeralX }}
+          className="pointer-events-none absolute -right-[0.04em] top-6 select-none text-[clamp(11rem,42vh,30rem)] font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/70"
+        >
+          {pad(index + 1)}
+        </motion.span>
       ) : null}
 
       <a
@@ -269,6 +228,6 @@ function Panel({
           </div>
         </div>
       </a>
-    </motion.li>
+    </li>
   );
 }

@@ -4,7 +4,6 @@ import { ArrowDown } from "lucide-react";
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import { memo, useCallback, useRef, useState } from "react";
 
-import { ScrambleText } from "@/components/scramble-text";
 import type { TimelineEvent } from "@/lib/timeline";
 import { cn, pad } from "@/lib/utils";
 
@@ -30,7 +29,7 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
   const years = [...new Set(events.map((event) => event.year))];
 
   // Stable, so a change of milestone re-renders only the two items whose
-  // state changed rather than the whole drum.
+  // state changed rather than every milestone.
   const activate = useCallback((index: number) => {
     setActive((previous) =>
       previous.index === index
@@ -61,11 +60,8 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
           </div>
           <div className="text-right text-sm lg:mt-6 lg:text-left">
             <p className="font-medium lg:text-2xl lg:tracking-[-0.02em]">
-              <ScrambleText text={current.month} trigger="change" />
-              <span className="text-mute">
-                {" / "}
-                <ScrambleText text={current.kind} trigger="change" />
-              </span>
+              {current.month}
+              <span className="text-mute"> / {current.kind}</span>
             </p>
             <p className="tabular-nums text-mute lg:hidden">
               {pad(active.index + 1)} / {pad(events.length)}
@@ -111,9 +107,8 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
   );
 }
 
-// Milestones sit on a drum: each tips back the further it is from the middle
-// of the screen and shrinks slightly, so the list turns past the reader like
-// a rolodex.
+// Milestones swing out to the side the further they sit from the middle of
+// the screen, so the list turns past the reader like a rolodex.
 const TimelineItem = memo(function TimelineItem({
   event,
   index,
@@ -130,24 +125,16 @@ const TimelineItem = memo(function TimelineItem({
     target: ref,
     offset: ["start end", "end start"],
   });
-  const rotateX = useTransform(scrollYProgress, (value) => {
-    const distance = Math.max(-1, Math.min(1, (value - 0.5) * 2));
-    return distance * 58;
+  const x = useTransform(scrollYProgress, (value) => {
+    const distance = (value - 0.5) * 2;
+    return `${distance * distance * 14}vw`;
   });
-  const scale = useTransform(scrollYProgress, (value) => {
-    const distance = Math.min(1, Math.abs((value - 0.5) * 2));
-    return 1 - distance * distance * 0.14;
-  });
-  // Perspective only while tilted, so an upright milestone renders crisp.
-  const transformPerspective = useTransform(rotateX, (value) =>
-    Math.abs(value) < 0.05 ? 0 : 1100,
-  );
 
   return (
     <motion.li
       ref={ref}
       data-parallax
-      style={{ rotateX, scale, transformPerspective }}
+      style={{ x }}
       onViewportEnter={() => onActivate(index)}
       viewport={{ margin: "-45% 0px -54% 0px" }}
       className={cn(
