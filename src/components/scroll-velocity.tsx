@@ -43,3 +43,13 @@ export function useLean(max: number) {
     return Math.max(-max, Math.min(max, lean));
   });
 }
+
+// A vertical stretch that grows with scroll speed in either direction, up to
+// `max` (0.2 is a 20% stretch) at about 2,200px a second.
+export function useStretch(max: number) {
+  const velocity = useContext(VelocityContext) ?? still;
+
+  return useTransform(velocity, (value) =>
+    1 + Math.min(max, (Math.abs(value) / 2200) * max),
+  );
+}

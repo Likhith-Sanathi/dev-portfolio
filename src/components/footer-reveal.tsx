@@ -3,6 +3,8 @@
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useRef } from "react";
 
+import { FlapTime } from "@/components/flap-time";
+import { SwissClock } from "@/components/swiss-clock";
 import { frame } from "@/lib/grid";
 import { cn } from "@/lib/utils";
 
@@ -11,8 +13,9 @@ function phase(value: number, start: number, end: number) {
 }
 
 // End credits. The footer is fixed under the page and a transparent spacer at
-// the end of the document uncovers it; as it is uncovered the name sets itself
-// letter by letter and the red full stop lands last.
+// the end of the document uncovers it; as it is uncovered the railway clock
+// winds up to the time in Cork, the name sets itself letter by letter and the
+// red full stop lands last.
 export function FooterReveal({
   name,
   children,
@@ -29,6 +32,7 @@ export function FooterReveal({
   const dotScale = useTransform(scrollYProgress, (value) =>
     phase(value, 0.82, 0.98),
   );
+  const wind = useTransform(scrollYProgress, (value) => phase(value, 0.3, 0.92));
 
   let letterIndex = 0;
   const line = (text: string) =>
@@ -46,7 +50,17 @@ export function FooterReveal({
       <div ref={spacerRef} aria-hidden="true" className="h-[72svh]" />
       <footer className="fixed inset-x-0 bottom-0 z-0 flex h-[72svh] flex-col bg-ink text-paper">
         {children}
-        <div className={cn(frame, "@container mt-auto pb-4 md:pb-6")}>
+        <div className={cn(frame, "mt-auto flex items-end justify-between gap-6")}>
+          <div className="pb-1">
+            <p className="text-sm text-paper/60">Local time in Cork</p>
+            <FlapTime
+              className="mt-3 text-3xl font-semibold md:text-5xl"
+              cellClassName="bg-paper text-ink"
+            />
+          </div>
+          <SwissClock wind={wind} className="size-[min(24svh,30vw)] shrink-0" />
+        </div>
+        <div className={cn(frame, "@container pb-4 pt-6 md:pb-6 md:pt-8")}>
           <p className="-ml-[0.06em] whitespace-nowrap text-[length:calc(100cqw/3.4)] font-semibold leading-[0.8] tracking-[-0.065em] md:text-[length:calc(100cqw/6.45)]">
             <span className="sr-only">{name}</span>
             <span aria-hidden="true" className="block overflow-hidden md:inline-block">

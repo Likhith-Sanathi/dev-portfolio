@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { motion, useMotionValue, useSpring } from "motion/react";
 import { useEffect, useState } from "react";
 
+import { useCalm } from "@/lib/motion-preference";
 import { useMediaQuery } from "@/lib/use-media-query";
 
 type Mode = "hidden" | "default" | "link" | "view";
@@ -19,10 +20,9 @@ const shapes: Record<Mode, { size: number; fill: boolean }> = {
 // into a "View" tile over project panels. A thin white ring keeps it visible
 // on the red sections. The real cursor stays; this only follows it.
 export function CursorFollower() {
-  const enabled = useMediaQuery(
-    "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
-    false,
-  );
+  const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)", false);
+  const calm = useCalm();
+  const enabled = finePointer && !calm;
   const x = useMotionValue(-200);
   const y = useMotionValue(-200);
   const followX = useSpring(x, { stiffness: 520, damping: 42, mass: 0.5 });

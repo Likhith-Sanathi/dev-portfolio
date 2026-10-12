@@ -1,25 +1,20 @@
 "use client";
 
 import { ArrowDown } from "lucide-react";
-import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useRef, useState } from "react";
 
+import { ScrambleText } from "@/components/scramble-text";
+import { SplitFlap } from "@/components/split-flap";
 import type { TimelineEvent } from "@/lib/timeline";
 import { cn, pad } from "@/lib/utils";
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const roll = {
-  enter: (direction: number) => ({ y: direction > 0 ? "100%" : "-100%" }),
-  center: { y: "0%" },
-  exit: (direction: number) => ({ y: direction > 0 ? "-100%" : "100%" }),
-};
-
-// A chronological story. The year stays pinned beside the events and rolls
-// over, digit by digit, as each milestone crosses the middle of the screen.
+// A chronological story. The year stays pinned beside the events on a
+// split-flap board and flips over as each milestone crosses the middle of
+// the screen.
 export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
   const listRef = useRef<HTMLOListElement>(null);
-  const [active, setActive] = useState({ index: 0, direction: 1 });
+  const [active, setActive] = useState({ index: 0 });
   const { scrollYProgress } = useScroll({
     target: listRef,
     offset: ["start center", "end center"],
@@ -29,11 +24,7 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
   const years = [...new Set(events.map((event) => event.year))];
 
   function activate(index: number) {
-    setActive((previous) =>
-      previous.index === index
-        ? previous
-        : { index, direction: index > previous.index ? 1 : -1 },
-    );
+    setActive((previous) => (previous.index === index ? previous : { index }));
   }
 
   return (
@@ -44,22 +35,29 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
       >
         <div className="flex items-end justify-between gap-4 lg:block">
           <div>
-            <p className="hidden justify-between text-sm lg:flex">
+            <p className="hidden items-center justify-between text-sm lg:flex">
               <span>Milestone</span>
-              <span className="tabular-nums text-mute">
-                {pad(active.index + 1)} / {pad(events.length)}
+              <span className="flex items-center gap-1.5 tabular-nums text-mute">
+                <SplitFlap
+                  value={pad(active.index + 1)}
+                  cellClassName="bg-ink text-paper"
+                />
+                / {pad(events.length)}
               </span>
             </p>
-            <RollingYear
-              year={current.year}
-              direction={active.direction}
-              className="text-5xl font-semibold tracking-[-0.06em] lg:mt-6 lg:text-[clamp(5rem,14.5vw,15rem)]"
+            <SplitFlap
+              value={current.year}
+              cellClassName="bg-ink text-paper"
+              className="text-5xl font-semibold tracking-[-0.04em] lg:mt-6 lg:text-[clamp(4.5rem,12.5vw,13rem)]"
             />
           </div>
           <div className="text-right text-sm lg:mt-6 lg:text-left">
             <p className="font-medium lg:text-2xl lg:tracking-[-0.02em]">
-              {current.month}
-              <span className="text-mute"> / {current.kind}</span>
+              <ScrambleText text={current.month} trigger="change" />
+              <span className="text-mute">
+                {" / "}
+                <ScrambleText text={current.kind} trigger="change" />
+              </span>
             </p>
             <p className="tabular-nums text-mute lg:hidden">
               {pad(active.index + 1)} / {pad(events.length)}
@@ -143,7 +141,7 @@ function TimelineItem({
       viewport={{ margin: "-45% 0px -54% 0px" }}
       className={cn(
         "border-b border-hairline py-10 transition-opacity duration-500 md:py-14",
-        isActive ? "opacity-100" : "opacity-30 motion-reduce:opacity-100",
+        isActive ? "opacity-100" : "opacity-30 calm:opacity-100",
       )}
     >
       <div className="flex items-center gap-3 text-sm">
@@ -199,45 +197,5 @@ function TimelineItem({
         </a>
       ) : null}
     </motion.li>
-  );
-}
-
-function RollingYear({
-  year,
-  direction,
-  className,
-}: {
-  year: string;
-  direction: number;
-  className?: string;
-}) {
-  return (
-    <span className={cn("flex leading-[0.85] tabular-nums", className)}>
-      {year.split("").map((digit, index) => (
-        <span
-          key={index}
-          className="relative -my-[0.06em] inline-block overflow-hidden py-[0.06em]"
-        >
-          <AnimatePresence
-            mode="popLayout"
-            initial={false}
-            custom={direction}
-          >
-            <motion.span
-              key={digit}
-              custom={direction}
-              variants={roll}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.55, delay: index * 0.04, ease }}
-              className="inline-block"
-            >
-              {digit}
-            </motion.span>
-          </AnimatePresence>
-        </span>
-      ))}
-    </span>
   );
 }

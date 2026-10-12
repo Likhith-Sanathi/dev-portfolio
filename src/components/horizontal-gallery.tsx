@@ -10,7 +10,9 @@ import {
 } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
+import { SplitFlap } from "@/components/split-flap";
 import type { portfolio } from "@/lib/portfolio-content";
+import { useCalm } from "@/lib/motion-preference";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { cn, pad } from "@/lib/utils";
 
@@ -24,10 +26,9 @@ export function HorizontalGallery({
 }: {
   projects: readonly Project[];
 }) {
-  const enabled = useMediaQuery(
-    "(prefers-reduced-motion: no-preference) and (min-height: 560px)",
-    true,
-  );
+  const tallEnough = useMediaQuery("(min-height: 560px)", true);
+  const calm = useCalm();
+  const enabled = tallEnough && !calm;
   const runwayRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLOListElement>(null);
   const [metrics, setMetrics] = useState({ distance: 0, panel: 0 });
@@ -121,8 +122,9 @@ export function HorizontalGallery({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-5 md:px-8 lg:px-10">
             <div className="flex items-center justify-between text-sm">
               <span>Selected projects</span>
-              <span className="tabular-nums text-mute">
-                {pad(active + 1)} / {pad(projects.length)}
+              <span className="flex items-center gap-1.5 tabular-nums text-mute">
+                <SplitFlap value={pad(active + 1)} cellClassName="bg-ink text-paper" />
+                / {pad(projects.length)}
               </span>
             </div>
             <div className="relative mt-3 h-px bg-hairline">

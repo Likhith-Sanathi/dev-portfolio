@@ -60,23 +60,41 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+/* Calm: the OS asks for reduced motion (unless the on-page toggle overrides
+   it with data-motion="full"), or the toggle sets data-motion="reduced". */
+@custom-variant calm {
+  @media (prefers-reduced-motion: reduce) {
+    :root:not([data-motion="full"]) & {
+      @slot;
+    }
+  }
+
+  :root[data-motion="reduced"] & {
+    @slot;
+  }
+}
+
+*,
+*::before,
+*::after {
+  @variant calm {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
 
-  /* Scroll-linked effects write inline styles, so neutralise them here. */
-  [data-parallax] {
+/* Scroll-linked effects write inline styles, so neutralise them here. */
+[data-parallax] {
+  @variant calm {
     transform: none !important;
     clip-path: none !important;
   }
+}
 
-  [data-scroll-fade] {
+[data-scroll-fade] {
+  @variant calm {
     opacity: 1 !important;
   }
 }

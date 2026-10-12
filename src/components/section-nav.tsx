@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { ScrambleText } from "@/components/scramble-text";
 import { cn } from "@/lib/utils";
 
 // Header navigation that marks the chapter currently under the middle of the
@@ -62,16 +63,16 @@ export function SectionNav({
             >
               {section.index}
             </span>
-            <span
+            <ScrambleText
+              text={section.label}
+              trigger="hover"
               className={cn(
                 "underline-offset-[6px] transition-[text-decoration-color] duration-200",
                 isActive
                   ? "underline decoration-signal decoration-2"
                   : "decoration-transparent",
               )}
-            >
-              {section.label}
-            </span>
+            />
           </a>
         );
       })}

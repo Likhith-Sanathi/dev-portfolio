@@ -74,10 +74,10 @@ export function CountStat({
   return (
     <span ref={ref} className={className}>
       <span className="sr-only">{value}</span>
-      <motion.span aria-hidden="true" className="tabular-nums motion-reduce:hidden">
+      <motion.span aria-hidden="true" className="tabular-nums calm:hidden">
         {text}
       </motion.span>
-      <span aria-hidden="true" className="hidden motion-reduce:inline">
+      <span aria-hidden="true" className="hidden calm:inline">
         {value}
       </span>
     </span>

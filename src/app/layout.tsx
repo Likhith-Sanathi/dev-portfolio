@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
+import Script from "next/script";
+
+import { motionPreferenceScript } from "@/lib/motion-preference-script";
 
 import "./globals.css";
 
@@ -49,11 +52,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // data-motion may be set by the script below before React hydrates.
     <html
       lang="en"
       className={`${GeistSans.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full">
+        <Script id="motion-preference" strategy="beforeInteractive">
+          {motionPreferenceScript}
+        </Script>
         {children}
       </body>
     </html>

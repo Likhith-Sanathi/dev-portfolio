@@ -2,7 +2,7 @@ import { ArrowUp, ArrowUpRight } from "lucide-react";
 
 import { CountStat } from "@/components/count-stat";
 import { CursorFollower } from "@/components/cursor-follower";
-import { ExpandingSection } from "@/components/expanding-section";
+import { ChapterNumeral } from "@/components/chapter-numeral";
 import { FlyInLines } from "@/components/fly-in-lines";
 import { FooterReveal } from "@/components/footer-reveal";
 import { GridToggle } from "@/components/grid-toggle";
@@ -10,17 +10,23 @@ import { HeroStage } from "@/components/hero-stage";
 import { HorizontalGallery } from "@/components/horizontal-gallery";
 import { InvertSection } from "@/components/invert-section";
 import { LenisProvider } from "@/components/lenis-provider";
-import { LocalTime } from "@/components/local-time";
+import { FlapTime } from "@/components/flap-time";
 import { Magnetic } from "@/components/magnetic";
 import { MaskText } from "@/components/mask-text";
 import { MotionProvider } from "@/components/motion-provider";
+import { MotionToggle } from "@/components/motion-toggle";
 import { Parallax } from "@/components/parallax";
+import { Reassemble } from "@/components/reassemble";
+import { ReplayIntro } from "@/components/replay-intro";
 import { Reveal, Rule } from "@/components/reveal";
 import { ScrollProgress } from "@/components/scroll-progress";
+import { ScrambleText } from "@/components/scramble-text";
 import { ScrollStatement } from "@/components/scroll-statement";
 import { SectionNav } from "@/components/section-nav";
 import { SkillRows } from "@/components/skill-rows";
+import { SkipLink } from "@/components/skip-link";
 import { SpinningMark } from "@/components/spinning-mark";
+import { SpotlightGrid } from "@/components/spotlight-grid";
 import { Timeline } from "@/components/timeline";
 import { frame, grid } from "@/lib/grid";
 import { portfolio } from "@/lib/portfolio-content";
@@ -45,8 +51,10 @@ const heroMeta = [
     content: (
       <>
         {portfolio.location}
-        <br />
-        <LocalTime className="tabular-nums" /> local time
+        <span className="mt-1 flex items-center gap-2">
+          <FlapTime cellClassName="bg-ink text-paper" />
+          local time
+        </span>
       </>
     ),
   },
@@ -68,6 +76,7 @@ export default function Home() {
   return (
     <MotionProvider>
       <LenisProvider>
+        <SkipLink target="about">Skip the intro</SkipLink>
         <ScrollProgress />
         <CursorFollower />
         <SiteHeader />
@@ -83,11 +92,12 @@ export default function Home() {
           />
           {/* Everything after the hero is a curtain that slides up over the
               pinned red stage once its statement has been read. */}
-          <div className="relative z-10 -mt-[100svh] border-t border-ink bg-paper motion-reduce:mt-0">
+          <div className="relative z-10 -mt-[100svh] border-t border-ink bg-paper calm:mt-0">
             <GlanceSection />
             <AboutSection />
             <ProjectsSection />
             <SkillsSection />
+            <Reassemble />
             <ContactSection />
           </div>
         </main>
@@ -112,13 +122,16 @@ function SiteHeader() {
           {portfolio.name}
         </a>
         <SectionNav sections={sections} />
-        <a
-          href={`mailto:${portfolio.email}`}
-          className="col-span-1 inline-flex items-center gap-1 justify-self-end font-medium transition-colors duration-200 hover:text-signal"
-        >
-          Email
-          <ArrowUpRight className="size-4" strokeWidth={1.75} />
-        </a>
+        <div className="col-span-1 flex items-center gap-3 justify-self-end">
+          <MotionToggle showLabel={false} className="p-1" />
+          <a
+            href={`mailto:${portfolio.email}`}
+            className="inline-flex items-center gap-1 font-medium transition-colors duration-200 hover:text-signal"
+          >
+            Email
+            <ArrowUpRight className="size-4" strokeWidth={1.75} />
+          </a>
+        </div>
       </div>
     </header>
   );
@@ -192,25 +205,23 @@ function SectionHead({
 }) {
   return (
     <div className="relative">
-      {/* A giant chapter numeral drifts down behind the heading. */}
+      {/* A giant chapter numeral slams into place, then drifts down behind
+          the heading. */}
       <Parallax
         from={-140}
         to={260}
         lean={10}
         className="pointer-events-none absolute right-0 top-0 select-none"
       >
-        <span
-          aria-hidden="true"
-          className="block text-[clamp(9rem,34vw,36rem)] font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/60"
-        >
+        <ChapterNumeral className="text-[clamp(9rem,34vw,36rem)] font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/60">
           {index}
-        </span>
+        </ChapterNumeral>
       </Parallax>
       <Rule />
       <div className={cn(grid, "relative gap-y-10 pt-4 md:pt-5")}>
         <p className="col-span-4 text-sm font-medium md:col-span-3">
           <span className="tabular-nums text-signal">{index}</span>
-          <span className="ml-3">{label}</span>
+          <ScrambleText text={label} className="ml-3" />
         </p>
         <Parallax
           axis="x"
@@ -231,7 +242,11 @@ function AboutSection() {
   const years = timeline.map((event) => event.year);
 
   return (
-    <section id="about" className={cn(frame, "pb-24 md:pb-40")}>
+    <section
+      id="about"
+      tabIndex={-1}
+      className={cn(frame, "pb-24 outline-none md:pb-40")}
+    >
       <SectionHead
         index="01"
         label={sections[0].label}
@@ -273,7 +288,8 @@ function ProjectsSection() {
 
 function SkillsSection() {
   return (
-    <InvertSection id="skills" className="pb-24 md:pb-40">
+    <InvertSection id="skills" className="relative isolate pb-24 md:pb-40">
+      <SpotlightGrid />
       <div className={frame}>
         <SectionHead
           index="03"
@@ -290,7 +306,7 @@ function SkillsSection() {
 
 function ContactSection() {
   return (
-    <ExpandingSection id="contact" className="bg-signal text-white">
+    <section id="contact" className="bg-signal text-white">
       <div className={cn(frame, "pb-10 pt-4 md:pb-14 md:pt-5")}>
         <p className="text-sm font-medium">
           <span className="tabular-nums">{sections[3].index}</span>
@@ -340,23 +356,23 @@ function ContactSection() {
           </ul>
         </div>
       </div>
-    </ExpandingSection>
+    </section>
   );
 }
 
-// The top bar of the end credits; the reveal adds the giant name below it.
+// The top bar of the end credits; the reveal adds the clock and the giant
+// name below it.
 function FooterBar() {
   return (
     <div className={cn(frame, grid, "gap-y-3 py-6 text-sm")}>
       <p className="col-span-4 md:col-span-3">© 2026 {portfolio.name}</p>
       <p className="col-span-4 text-paper/60 md:col-span-3">
-        {portfolio.location}, <LocalTime className="tabular-nums" />
-      </p>
-      <p className="col-span-4 text-paper/60 md:col-span-3">
         Set in Geist on a 12-column grid.
       </p>
-      <div className="col-span-4 mt-3 flex items-center justify-between gap-6 md:col-span-3 md:mt-0 md:justify-end">
+      <div className="col-span-4 mt-3 flex flex-wrap items-center gap-x-6 gap-y-3 md:col-span-6 md:mt-0 md:justify-end">
         <GridToggle className="focus-visible:outline-paper" />
+        <MotionToggle className="focus-visible:outline-paper" />
+        <ReplayIntro className="focus-visible:outline-paper" />
         <a
           href="#top"
           className="inline-flex items-center gap-1 transition-colors duration-200 hover:text-signal focus-visible:outline-paper"
