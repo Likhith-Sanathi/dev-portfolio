@@ -98,3 +98,10 @@
     opacity: 1 !important;
   }
 }
+
+/* Type that changes weight with the scroll settles at its final weight. */
+[data-weight] {
+  @variant calm {
+    font-weight: 600 !important;
+  }
+}

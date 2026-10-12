@@ -14,6 +14,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import { REPLAY_INTRO_EVENT } from "@/components/replay-intro";
+import { TextRing } from "@/components/text-ring";
 import { frame, grid } from "@/lib/grid";
 import { MOTION_PREFERENCE_EVENT, useCalm } from "@/lib/motion-preference";
 import { cn } from "@/lib/utils";
@@ -68,11 +69,14 @@ export function HeroStage({
   last,
   meta,
   statement,
+  ring,
 }: {
   first: string;
   last: string;
   meta: readonly { label: string; content: React.ReactNode }[];
   statement: string;
+  // Set round the turning badge in the corner of the stage.
+  ring: string;
 }) {
   const runwayRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -132,6 +136,8 @@ export function HeroStage({
   const counter = useTransform(count, (value) =>
     String(Math.round(value)).padStart(3, "0"),
   );
+  // The counter goes from hairline to black as it counts.
+  const counterWeight = useTransform(count, (value) => 100 + value * 8);
 
   useEffect(() => {
     function onPreferenceChange() {
@@ -267,13 +273,18 @@ export function HeroStage({
   const labelOpacity = useTransform(scrollYProgress, (value) =>
     phase(value, [STATEMENT[0], STATEMENT[0] + 0.05]),
   );
+  const ringOpacity = useTransform(scrollYProgress, (value) =>
+    1 - phase(value, [ZOOM[0], ZOOM[0] + 0.08]),
+  );
   const words = statement.split(" ");
   const step = (STATEMENT[1] - STATEMENT[0] - 0.06) / words.length;
   const nameIn = introStage !== "count";
 
   const lines = [
-    { text: first, flight: firstFlight, direction: -1, delay: 0.25 },
-    { text: last, flight: lastFlight, direction: 1, delay: 0.35 },
+    { text: first, flight: firstFlight, direction: -1, delay: 0.25, thins: true },
+    // The last name keeps its weight: it carries the full stop the zoom is
+    // centred on, and thinner letters would slide it out of place.
+    { text: last, flight: lastFlight, direction: 1, delay: 0.35, thins: false },
   ];
 
   return (
@@ -318,8 +329,12 @@ export function HeroStage({
               <span
                 key={line.text}
                 aria-hidden="true"
-                className="block whitespace-nowrap"
+                className={cn(
+                  "whitespace-nowrap",
+                  lineIndex === 0 ? "flex items-center justify-between" : "block",
+                )}
               >
+                <span>
                 {line.text.split("").map((letter, index) => {
                   const pick = (values: number[]) => values[index % values.length];
 
@@ -336,12 +351,26 @@ export function HeroStage({
                       drift={pick(line.flight.drift)}
                       spin={pick(line.flight.spin)}
                       depth={pick(line.flight.depth)}
+                      thins={line.thins}
                       delay={line.delay + index * 0.035}
                     >
                       {letter}
                     </Letter>
                   );
                 })}
+                </span>
+                {lineIndex === 0 ? (
+                  // The turning badge fills the space the shorter first line
+                  // leaves at the right edge, sized to the type.
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: introStage === "done" ? 1 : 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="inline-block size-[0.46em] shrink-0"
+                  >
+                    <TextRing text={`${ring} · `} opacity={ringOpacity} className="size-full" />
+                  </motion.span>
+                ) : null}
                 {lineIndex === lines.length - 1 ? (
                   // The full stop: a red square that floods the stage.
                   <span
@@ -429,7 +458,8 @@ export function HeroStage({
                 initial={{ y: "100%" }}
                 animate={{ y: introStage === "count" ? "0%" : "-105%" }}
                 transition={{ duration: 0.75, ease }}
-                className="block text-[clamp(7rem,30vw,30rem)] font-semibold leading-[0.8] tracking-[-0.06em] tabular-nums"
+                style={{ fontWeight: counterWeight }}
+                className="block text-[clamp(7rem,30vw,30rem)] leading-[0.8] tracking-[-0.06em] tabular-nums"
               >
                 {counter}
               </motion.span>
@@ -489,6 +519,7 @@ function Letter({
   drift,
   spin,
   depth,
+  thins,
   delay,
   children,
 }: {
@@ -502,6 +533,7 @@ function Letter({
   drift: number;
   spin: number;
   depth: number;
+  thins: boolean;
   delay: number;
   children: string;
 }) {
@@ -566,12 +598,17 @@ function Letter({
   const rotate = useTransform(progress, (value) =>
     phase(value, SCATTER) ** 1.6 * spin,
   );
+  // Letters that thin out lose weight as they fly, down to a hairline.
+  const fontWeight = useTransform(progress, (value) =>
+    thins ? 600 - phase(value, SCATTER) ** 1.2 * 500 : 600,
+  );
 
   return (
     <span ref={anchorRef} className="inline-block">
       <motion.span
         data-parallax
-        style={{ x, y, rotate }}
+        data-weight
+        style={{ x, y, rotate, fontWeight }}
         className="inline-block"
       >
         <motion.span

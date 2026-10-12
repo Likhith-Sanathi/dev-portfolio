@@ -3,8 +3,9 @@
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 
-// Each line of a heading flies in from alternating sides of the screen and
-// locks into the left edge as the heading scrolls up into place.
+// Each line of a heading flies in from alternating sides of the screen,
+// gaining weight, and locks into the left edge as the heading scrolls up into
+// place.
 export function FlyInLines({
   lines,
   className,
@@ -45,16 +46,19 @@ function Line({
   lag: number;
   children: string;
 }) {
-  const x = useTransform(progress, (value) => {
-    const t = Math.min(1, Math.max(0, (value - lag) / (1 - lag)));
-    return `${(1 - t) ** 3 * from}vw`;
-  });
+  const t = useTransform(progress, (value) =>
+    Math.min(1, Math.max(0, (value - lag) / (1 - lag))),
+  );
+  const x = useTransform(t, (value) => `${(1 - value) ** 3 * from}vw`);
+  // Each line arrives light and gains weight as it locks into place.
+  const fontWeight = useTransform(t, (value) => 200 + (1 - (1 - value) ** 3) * 400);
 
   return (
     <motion.span
       aria-hidden="true"
       data-parallax
-      style={{ x }}
+      data-weight
+      style={{ x, fontWeight }}
       className="block whitespace-nowrap"
     >
       {children}

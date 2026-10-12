@@ -1,10 +1,10 @@
-import { ArrowUp, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
-import { CountStat } from "@/components/count-stat";
 import { CursorFollower } from "@/components/cursor-follower";
 import { ChapterNumeral } from "@/components/chapter-numeral";
 import { FlyInLines } from "@/components/fly-in-lines";
 import { FooterReveal } from "@/components/footer-reveal";
+import { GridLines } from "@/components/grid-lines";
 import { GridToggle } from "@/components/grid-toggle";
 import { HeroStage } from "@/components/hero-stage";
 import { HorizontalGallery } from "@/components/horizontal-gallery";
@@ -18,6 +18,8 @@ import { MotionToggle } from "@/components/motion-toggle";
 import { Parallax } from "@/components/parallax";
 import { Reassemble } from "@/components/reassemble";
 import { ReplayIntro } from "@/components/replay-intro";
+import { RewindLink } from "@/components/rewind-link";
+import { RouteRail } from "@/components/route-rail";
 import { Reveal, Rule } from "@/components/reveal";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { ScrambleText } from "@/components/scramble-text";
@@ -27,6 +29,8 @@ import { SkillRows } from "@/components/skill-rows";
 import { SkipLink } from "@/components/skip-link";
 import { SpinningMark } from "@/components/spinning-mark";
 import { SpotlightGrid } from "@/components/spotlight-grid";
+import { StatFigure } from "@/components/stat-figure";
+import { Ticker } from "@/components/ticker";
 import { Timeline } from "@/components/timeline";
 import { frame, grid } from "@/lib/grid";
 import { portfolio } from "@/lib/portfolio-content";
@@ -39,6 +43,8 @@ const sections = portfolio.nav.map((item, index) => ({
   ...item,
   index: pad(index + 1),
 }));
+
+const stations = [{ href: "#top", label: "Introduction", index: "00" }, ...sections];
 
 const sectionTitle =
   "text-[clamp(2.75rem,6.6vw,7.25rem)] font-semibold leading-[0.92] tracking-[-0.05em]";
@@ -79,6 +85,7 @@ export default function Home() {
         <SkipLink target="about">Skip the intro</SkipLink>
         <ScrollProgress />
         <CursorFollower />
+        <RouteRail stations={stations} />
         <SiteHeader />
         {/* overflow-x-clip here, not on body: body overflow is handed to the
             viewport, where it doesn't stop sideways parallax widening the page
@@ -89,12 +96,15 @@ export default function Home() {
             last={lastName}
             meta={heroMeta}
             statement={portfolio.hero}
+            ring={portfolio.availability}
           />
           {/* Everything after the hero is a curtain that slides up over the
               pinned red stage once its statement has been read. */}
           <div className="relative z-10 -mt-[100svh] border-t border-ink bg-paper calm:mt-0">
             <GlanceSection />
+            <TickerCross />
             <AboutSection />
+            <ProjectTicker />
             <ProjectsSection />
             <SkillsSection />
             <Reassemble />
@@ -185,12 +195,54 @@ function GlanceSection() {
               <span className="tabular-nums text-mute">{pad(index + 1)}</span>
             </dt>
             <dd className="mt-8 text-[clamp(3.5rem,7.2vw,8rem)] font-semibold leading-[0.85] tracking-[-0.055em] md:mt-16">
-              <CountStat value={stat.value} />
+              <StatFigure value={stat.value} />
             </dd>
           </Parallax>
         ))}
       </dl>
     </section>
+  );
+}
+
+// Two railway tickers crossing in an X: availability one way, results the
+// other. Both pick up speed and turn round with the scroll.
+function TickerCross() {
+  const status = [portfolio.availability, portfolio.location, portfolio.role];
+  const results = portfolio.stats.map((stat) => `${stat.value} ${stat.label}`);
+
+  return (
+    <div
+      aria-hidden="true"
+      className="relative h-[clamp(10rem,22vw,18rem)] overflow-hidden"
+    >
+      <div className="absolute inset-x-[-10%] top-1/2 -translate-y-1/2 -rotate-[4deg]">
+        <Ticker
+          items={status}
+          className="bg-ink py-3 text-[clamp(1.5rem,3.2vw,2.75rem)] font-semibold tracking-[-0.03em] text-paper md:py-4"
+        />
+      </div>
+      <div className="absolute inset-x-[-10%] top-1/2 -translate-y-1/2 rotate-[3deg]">
+        <Ticker
+          items={results}
+          direction={-1}
+          speed={55}
+          className="bg-signal py-3 text-[clamp(1.5rem,3.2vw,2.75rem)] font-semibold tracking-[-0.03em] text-white md:py-4"
+        />
+      </div>
+    </div>
+  );
+}
+
+// Coming up: the project names run past between the story and the work.
+function ProjectTicker() {
+  return (
+    <div aria-hidden="true" className="border-y border-ink py-4 md:py-6">
+      <Ticker
+        items={portfolio.projects.map((project) => project.title)}
+        speed={90}
+        className="text-[clamp(2.5rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.05em]"
+      />
+    </div>
   );
 }
 
@@ -205,6 +257,7 @@ function SectionHead({
 }) {
   return (
     <div className="relative">
+      <GridLines />
       {/* A giant chapter numeral slams into place, then drifts down behind
           the heading. */}
       <Parallax
@@ -373,13 +426,7 @@ function FooterBar() {
         <GridToggle className="focus-visible:outline-paper" />
         <MotionToggle className="focus-visible:outline-paper" />
         <ReplayIntro className="focus-visible:outline-paper" />
-        <a
-          href="#top"
-          className="inline-flex items-center gap-1 transition-colors duration-200 hover:text-signal focus-visible:outline-paper"
-        >
-          Top
-          <ArrowUp className="size-4" strokeWidth={1.75} />
-        </a>
+        <RewindLink className="focus-visible:outline-paper" />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { ArrowDown } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
-import { useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 
 import { ScrambleText } from "@/components/scramble-text";
 import { SplitFlap } from "@/components/split-flap";
@@ -23,9 +23,11 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
   const current = events[active.index];
   const years = [...new Set(events.map((event) => event.year))];
 
-  function activate(index: number) {
+  // Stable, so a change of milestone re-renders only the two items whose
+  // state changed rather than the whole drum.
+  const activate = useCallback((index: number) => {
     setActive((previous) => (previous.index === index ? previous : { index }));
-  }
+  }, []);
 
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-x-6">
@@ -93,8 +95,9 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
           <TimelineItem
             key={event.id}
             event={event}
+            index={index}
             isActive={index === active.index}
-            onActivate={() => activate(index)}
+            onActivate={activate}
           />
         ))}
       </ol>
@@ -105,14 +108,16 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
 // Milestones sit on a drum: each tips back the further it is from the middle
 // of the screen and shrinks slightly, so the list turns past the reader like
 // a rolodex.
-function TimelineItem({
+const TimelineItem = memo(function TimelineItem({
   event,
+  index,
   isActive,
   onActivate,
 }: {
   event: TimelineEvent;
+  index: number;
   isActive: boolean;
-  onActivate: () => void;
+  onActivate: (index: number) => void;
 }) {
   const ref = useRef<HTMLLIElement>(null);
   const { scrollYProgress } = useScroll({
@@ -137,7 +142,7 @@ function TimelineItem({
       ref={ref}
       data-parallax
       style={{ rotateX, scale, transformPerspective }}
-      onViewportEnter={onActivate}
+      onViewportEnter={() => onActivate(index)}
       viewport={{ margin: "-45% 0px -54% 0px" }}
       className={cn(
         "border-b border-hairline py-10 transition-opacity duration-500 md:py-14",
@@ -198,4 +203,4 @@ function TimelineItem({
       ) : null}
     </motion.li>
   );
-}
+});

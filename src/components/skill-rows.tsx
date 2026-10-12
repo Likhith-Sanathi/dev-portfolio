@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import { useLean, useStretch } from "@/components/scroll-velocity";
+import { useLean, useSpeed, useStretch } from "@/components/scroll-velocity";
 import { frame } from "@/lib/grid";
 import { cn, pad } from "@/lib/utils";
 
@@ -14,7 +14,8 @@ const leads = [0.12, 0.38, 0.22, 0.5];
 // Each skill group is set as one long line of type that slides sideways as
 // it crosses the screen, alternating direction row by row. The travel is
 // sized from the measured overflow, so every item passes through view, and
-// every row leans and stretches in proportion to the scroll speed.
+// every row leans, stretches and pushes apart in proportion to the scroll
+// speed.
 export function SkillRows({
   groups,
 }: {
@@ -22,6 +23,7 @@ export function SkillRows({
 }) {
   const skewX = useLean(16);
   const scaleY = useStretch(0.22);
+  const speed = useSpeed();
 
   return (
     <div>
@@ -34,6 +36,8 @@ export function SkillRows({
           lead={leads[index % leads.length]}
           skewX={skewX}
           scaleY={scaleY}
+          speed={speed}
+          spread={index - (groups.length - 1) / 2}
         />
       ))}
       <div className={frame}>
@@ -50,6 +54,8 @@ function SkillRow({
   lead: leadShare,
   skewX,
   scaleY,
+  speed,
+  spread,
 }: {
   title: string;
   items: readonly string[];
@@ -57,6 +63,9 @@ function SkillRow({
   lead: number;
   skewX: MotionValue<number>;
   scaleY: MotionValue<number>;
+  speed: MotionValue<number>;
+  // This row's distance from the middle of the stack, in rows.
+  spread: number;
 }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLUListElement>(null);
@@ -91,6 +100,9 @@ function SkillRow({
     return lead - travel * (reverse ? 1 - progress : progress);
   });
 
+  // Rows push apart from the middle of the stack as the scroll speeds up.
+  const y = useTransform(speed, (value) => value * spread * 44);
+
   return (
     <div>
       <div className={frame}>
@@ -103,7 +115,7 @@ function SkillRow({
         <motion.ul
           ref={trackRef}
           data-parallax
-          style={{ x, skewX, scaleY }}
+          style={{ x, y, skewX, scaleY }}
           className={cn(
             "flex w-max items-center whitespace-nowrap px-4 md:px-8 lg:px-10",
             "text-[clamp(3.75rem,11vw,12rem)] font-semibold leading-[1.02] tracking-[-0.055em]",

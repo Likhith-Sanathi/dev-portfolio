@@ -93,13 +93,19 @@ function Letter({
   index: number;
   children: string;
 }) {
-  const y = useTransform(progress, (value) => {
-    const t = phase(value, 0.2 + index * 0.03, 0.62 + index * 0.03);
-    return `${(1 - t) ** 3 * 105}%`;
-  });
+  const t = useTransform(progress, (value) =>
+    phase(value, 0.2 + index * 0.03, 0.62 + index * 0.03),
+  );
+  const y = useTransform(t, (value) => `${(1 - value) ** 3 * 105}%`);
+  const fontWeight = useTransform(t, (value) => 200 + (1 - (1 - value) ** 3) * 400);
 
   return (
-    <motion.span data-parallax style={{ y }} className="inline-block">
+    <motion.span
+      data-parallax
+      data-weight
+      style={{ y, fontWeight }}
+      className="inline-block"
+    >
       {children}
     </motion.span>
   );
