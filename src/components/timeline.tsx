@@ -55,11 +55,11 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
             <RollingYear
               year={current.year}
               direction={active.direction}
-              className="text-5xl font-semibold tracking-[-0.06em] lg:mt-6 lg:text-[clamp(5rem,14.5vw,15rem)]"
+              className="text-display font-semibold tracking-[-0.06em] lg:mt-6 lg:text-poster"
             />
           </div>
           <div className="text-right text-sm lg:mt-6 lg:text-left">
-            <p className="font-medium lg:text-2xl lg:tracking-[-0.02em]">
+            <p className="font-medium lg:text-lead lg:tracking-[-0.02em]">
               {current.month}
               <span className="text-mute"> / {current.kind}</span>
             </p>
@@ -153,11 +153,11 @@ const TimelineItem = memo(function TimelineItem({
         <span className="tabular-nums">{event.period}</span>
         <span className="text-mute">{event.kind}</span>
       </div>
-      <h3 className="mt-4 text-balance text-[clamp(1.75rem,3.2vw,3rem)] font-semibold leading-none tracking-[-0.04em]">
+      <h3 className="mt-4 text-balance text-lead font-semibold leading-none tracking-[-0.04em]">
         {event.title}
       </h3>
       {event.subtitle ? (
-        <p className="mt-3 text-base text-mute md:text-lg">
+        <p className="mt-3 text-base text-mute">
           {event.subtitle}
         </p>
       ) : null}
@@ -188,7 +188,7 @@ const TimelineItem = memo(function TimelineItem({
       {event.href ? (
         <a
           href={event.href}
-          className="mt-6 inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:text-signal"
+          className="mt-6 inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:text-signal-ink"
         >
           {event.linkLabel}
           <ArrowDown className="size-4" strokeWidth={1.75} />

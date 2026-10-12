@@ -50,7 +50,7 @@ export function FooterReveal({
         <div className={cn(frame, "mt-auto pb-1")}>
           <p className="text-sm text-paper/60">Local time in Cork</p>
           <FlapTime
-            className="mt-3 text-3xl font-semibold md:text-5xl"
+            className="mt-3 text-lead font-semibold"
             cellClassName="bg-paper text-ink"
           />
         </div>

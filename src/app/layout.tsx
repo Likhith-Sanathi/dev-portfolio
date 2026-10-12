@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import Script from "next/script";
 
-import { motionPreferenceScript } from "@/lib/motion-preference-script";
+import { preferenceScript } from "@/lib/preference-script";
 
 import "./globals.css";
 
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#f3f2ee",
-  colorScheme: "light",
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({
@@ -52,7 +52,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // data-motion may be set by the script below before React hydrates.
+    // data-motion and data-theme may be set by the script below before React
+    // hydrates.
     <html
       lang="en"
       className={`${GeistSans.variable} h-full antialiased`}
@@ -60,7 +61,7 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <Script id="motion-preference" strategy="beforeInteractive">
-          {motionPreferenceScript}
+          {preferenceScript}
         </Script>
         {children}
       </body>

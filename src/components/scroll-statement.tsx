@@ -34,7 +34,7 @@ export function ScrollStatement({
       <div className="sticky top-0 flex h-svh items-center calm:static calm:h-auto calm:py-20">
         <div className={cn(grid, "w-full gap-y-6")}>
           <p className="col-span-4 text-sm text-mute md:col-span-3">{label}</p>
-          <p className="col-span-4 text-[clamp(2rem,4.4vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.04em] md:col-span-9">
+          <p className="col-span-4 text-title font-semibold leading-[1.02] tracking-[-0.04em] md:col-span-9">
             {words.map((word, index) => (
               <Word
                 key={index}

@@ -23,7 +23,7 @@ export function MotionToggle({
       aria-label={showLabel ? undefined : "Motion"}
       title={calm ? "Turn motion on" : "Turn motion off"}
       className={cn(
-        "inline-flex items-center gap-2 transition-colors duration-200 hover:text-signal",
+        "inline-flex items-center gap-2 transition-colors duration-200 hover:text-signal-ink",
         className,
       )}
     >

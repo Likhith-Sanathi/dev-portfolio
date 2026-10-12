@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import { useLean, useSpeed, useStretch } from "@/components/scroll-velocity";
+import { useSpeed } from "@/components/scroll-velocity";
 import { frame } from "@/lib/grid";
 import { cn, pad } from "@/lib/utils";
 
@@ -14,15 +14,13 @@ const leads = [0.12, 0.38, 0.22, 0.5];
 // Each skill group is set as one long line of type that slides sideways as
 // it crosses the screen, alternating direction row by row. The travel is
 // sized from the measured overflow, so every item passes through view, and
-// every row leans, stretches and pushes apart in proportion to the scroll
-// speed.
+// the rows push apart from the middle in proportion to the scroll speed. The
+// letterforms themselves are never slanted or stretched.
 export function SkillRows({
   groups,
 }: {
   groups: readonly { title: string; items: readonly string[] }[];
 }) {
-  const skewX = useLean(16);
-  const scaleY = useStretch(0.22);
   const speed = useSpeed();
 
   return (
@@ -34,8 +32,6 @@ export function SkillRows({
           items={group.items}
           reverse={index % 2 === 1}
           lead={leads[index % leads.length]}
-          skewX={skewX}
-          scaleY={scaleY}
           speed={speed}
           spread={index - (groups.length - 1) / 2}
         />
@@ -52,8 +48,6 @@ function SkillRow({
   items,
   reverse,
   lead: leadShare,
-  skewX,
-  scaleY,
   speed,
   spread,
 }: {
@@ -61,8 +55,6 @@ function SkillRow({
   items: readonly string[];
   reverse: boolean;
   lead: number;
-  skewX: MotionValue<number>;
-  scaleY: MotionValue<number>;
   speed: MotionValue<number>;
   // This row's distance from the middle of the stack, in rows.
   spread: number;
@@ -115,10 +107,10 @@ function SkillRow({
         <motion.ul
           ref={trackRef}
           data-parallax
-          style={{ x, y, skewX, scaleY }}
+          style={{ x, y }}
           className={cn(
             "flex w-max items-center whitespace-nowrap px-4 md:px-8 lg:px-10",
-            "text-[clamp(3.75rem,11vw,12rem)] font-semibold leading-[1.02] tracking-[-0.055em]",
+            "text-poster font-semibold leading-[1.02] tracking-[-0.055em]",
             "calm:w-auto calm:flex-wrap calm:whitespace-normal",
           )}
         >

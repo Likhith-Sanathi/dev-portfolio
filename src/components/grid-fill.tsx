@@ -4,6 +4,7 @@ import { useMotionValueEvent, useScroll } from "motion/react";
 import { useEffect, useRef } from "react";
 
 import { frame, grid } from "@/lib/grid";
+import { useTheme } from "@/lib/theme-preference";
 import { cn } from "@/lib/utils";
 
 // Beats of the pinned runway, as fractions of its scroll progress.
@@ -50,6 +51,7 @@ export function GridFill() {
   const gridRef = useRef<HTMLDivElement>(null);
   const layoutRef = useRef<Layout | null>(null);
   const frameRef = useRef(0);
+  const theme = useTheme();
   const { scrollYProgress } = useScroll({
     target: runwayRef,
     offset: ["start 56px", "end end"],
@@ -183,7 +185,8 @@ export function GridFill() {
       observer.disconnect();
       cancelAnimationFrame(frameRef.current);
     };
-  }, [scrollYProgress]);
+    // The theme is a dependency so a switch re-reads the palette.
+  }, [scrollYProgress, theme]);
 
   return (
     <div

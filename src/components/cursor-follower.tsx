@@ -17,7 +17,7 @@ const shapes: Record<Mode, { size: number; fill: boolean }> = {
 };
 
 // A red square that trails the pointer, opens into an outline over links and
-// into a "View" tile over project panels. A thin white ring keeps it visible
+// into a "View" tile over project panels. A thin paper-coloured ring keeps it visible
 // on the red sections. The real cursor stays; this only follows it.
 export function CursorFollower() {
   const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)", false);
@@ -83,7 +83,7 @@ export function CursorFollower() {
       style={{ x: followX, y: followY }}
     >
       <motion.div
-        className="flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden text-xs font-medium text-white shadow-[0_0_0_1px_rgba(255,255,255,0.85)]"
+        className="flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden text-sm font-medium text-on-signal shadow-[0_0_0_1px_var(--on-signal)]"
         initial={false}
         animate={{
           width: shape.size,

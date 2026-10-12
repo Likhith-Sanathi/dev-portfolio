@@ -30,7 +30,7 @@ export function RewindLink({ className }: { className?: string }) {
       href="#top"
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1 transition-colors duration-200 hover:text-signal",
+        "inline-flex items-center gap-1 transition-colors duration-200 hover:text-signal-ink",
         className,
       )}
     >

@@ -37,7 +37,7 @@ export function GridToggle({ className }: { className?: string }) {
         onClick={() => setVisible((current) => !current)}
         aria-pressed={visible}
         className={cn(
-          "inline-flex items-center gap-2 text-left transition-colors duration-200 hover:text-signal",
+          "inline-flex items-center gap-2 text-left transition-colors duration-200 hover:text-signal-ink",
           className,
         )}
       >

@@ -7,24 +7,59 @@
   --color-mute: var(--mute);
   --color-hairline: var(--hairline);
   --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-on-signal: var(--on-signal);
   --font-sans: var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial,
     sans-serif;
 }
 
+/* The type scale: five display steps on top of text-sm and text-base. The
+   hero and credits names are set to the measure instead. */
+@theme {
+  --text-lead: clamp(1.5rem, 2.8vw, 2.75rem);
+  --text-lead--line-height: 1.1;
+  --text-title: clamp(2.25rem, 5vw, 5.25rem);
+  --text-title--line-height: 0.95;
+  --text-display: clamp(2.75rem, 7vw, 7.5rem);
+  --text-display--line-height: 0.92;
+  --text-poster: clamp(3rem, 11vw, 12rem);
+  --text-poster--line-height: 0.9;
+  --text-giant: clamp(7rem, 30vw, 34rem);
+  --text-giant--line-height: 0.75;
+}
+
 :root {
-  /* Three-colour system: paper, ink and a single signal red. */
+  /* Three colours: paper, ink and a single signal red. signal-ink is the red
+     for small type, which needs to be lighter on a dark ground; on-signal is
+     the paper-white used on red in either theme. */
   --paper: #f3f2ee;
   --ink: #111110;
   --mute: #5f5e59;
   --hairline: #cfcdc5;
   --signal: #d32a1d;
-  /* Matches the frame padding in src/lib/grid.ts. */
+  --signal-ink: #d32a1d;
+  --on-signal: #f3f2ee;
+  /* Match the frame padding and column gap in src/lib/grid.ts. */
   --gutter: 1rem;
+  --col-gap: 1rem;
+  --columns: 4;
+}
+
+/* Dark mode, chosen with the on-page toggle (see theme-preference.ts). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #111110;
+  --ink: #f3f2ee;
+  --mute: #a3a29b;
+  --hairline: #34332f;
+  --signal-ink: #ef5a48;
 }
 
 @media (min-width: 48rem) {
   :root {
     --gutter: 2rem;
+    --col-gap: 1.5rem;
+    --columns: 12;
   }
 }
 
@@ -51,7 +86,7 @@
 
   ::selection {
     background-color: var(--signal);
-    color: #ffffff;
+    color: var(--on-signal);
   }
 
   :focus-visible {

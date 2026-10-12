@@ -32,7 +32,7 @@ export function ReplayIntro({ className }: { className?: string }) {
       type="button"
       onClick={replay}
       className={cn(
-        "inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-signal",
+        "inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-signal-ink",
         className,
       )}
     >

@@ -11,7 +11,7 @@ import { HeroStage } from "@/components/hero-stage";
 import { HorizontalGallery } from "@/components/horizontal-gallery";
 import { InvertSection } from "@/components/invert-section";
 import { LenisProvider } from "@/components/lenis-provider";
-import { FlapTime } from "@/components/flap-time";
+import { LocalTime } from "@/components/local-time";
 import { Magnetic } from "@/components/magnetic";
 import { MaskText } from "@/components/mask-text";
 import { MotionProvider } from "@/components/motion-provider";
@@ -21,14 +21,13 @@ import { ReplayIntro } from "@/components/replay-intro";
 import { RewindLink } from "@/components/rewind-link";
 import { Reveal, Rule } from "@/components/reveal";
 import { ScrollProgress } from "@/components/scroll-progress";
-import { ScrambleText } from "@/components/scramble-text";
 import { ScrollStatement } from "@/components/scroll-statement";
 import { SectionNav } from "@/components/section-nav";
 import { SkillRows } from "@/components/skill-rows";
 import { SkipLink } from "@/components/skip-link";
-import { SpinningMark } from "@/components/spinning-mark";
 import { SpotlightGrid } from "@/components/spotlight-grid";
 import { StatFigure } from "@/components/stat-figure";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Ticker } from "@/components/ticker";
 import { Timeline } from "@/components/timeline";
 import { frame, grid } from "@/lib/grid";
@@ -44,7 +43,7 @@ const sections = portfolio.nav.map((item, index) => ({
 }));
 
 const sectionTitle =
-  "text-[clamp(2.75rem,6.6vw,7.25rem)] font-semibold leading-[0.92] tracking-[-0.05em]";
+  "text-display font-semibold leading-[0.92] tracking-[-0.05em]";
 
 const heroMeta = [
   { label: "Discipline", content: portfolio.role },
@@ -54,10 +53,8 @@ const heroMeta = [
     content: (
       <>
         {portfolio.location}
-        <span className="mt-1 flex items-center gap-2">
-          <FlapTime cellClassName="bg-ink text-paper" />
-          local time
-        </span>
+        <br />
+        <LocalTime className="tabular-nums" /> local time
       </>
     ),
   },
@@ -92,7 +89,6 @@ export default function Home() {
             last={lastName}
             meta={heroMeta}
             statement={portfolio.hero}
-            ring={portfolio.availability}
           />
           {/* Everything after the hero is a curtain that slides up over the
               pinned red stage once its statement has been read. */}
@@ -123,15 +119,18 @@ function SiteHeader() {
           className="col-span-3 flex items-center gap-2.5 font-semibold tracking-[-0.01em]"
           aria-label={`${portfolio.name}, back to top`}
         >
-          <SpinningMark />
+          <span aria-hidden="true" className="size-3 shrink-0 bg-signal" />
           {portfolio.name}
         </a>
         <SectionNav sections={sections} />
         <div className="col-span-1 flex items-center gap-3 justify-self-end">
-          <MotionToggle showLabel={false} className="p-1" />
+          {/* Hidden on tablets, where the nav fills the bar; both toggles are
+              also in the footer. */}
+          <ThemeToggle showLabel={false} className="p-1 md:hidden lg:inline-flex" />
+          <MotionToggle showLabel={false} className="p-1 md:hidden lg:inline-flex" />
           <a
             href={`mailto:${portfolio.email}`}
-            className="inline-flex items-center gap-1 font-medium transition-colors duration-200 hover:text-signal"
+            className="inline-flex items-center gap-1 font-medium transition-colors duration-200 hover:text-signal-ink"
           >
             Email
             <ArrowUpRight className="size-4" strokeWidth={1.75} />
@@ -150,7 +149,7 @@ function GlanceSection() {
     >
       <div className={cn(grid, "gap-y-10")}>
         <p className="col-span-4 text-sm font-medium md:col-span-3">
-          <span className="tabular-nums text-signal">00</span>
+          <span className="tabular-nums text-signal-ink">00</span>
           <span className="ml-3">At a glance</span>
         </p>
         <nav
@@ -163,7 +162,7 @@ function GlanceSection() {
               <li key={section.href}>
                 <a
                   href={section.href}
-                  className="flex items-center justify-between border-b border-hairline py-2 transition-colors duration-200 hover:text-signal"
+                  className="flex items-center justify-between border-b border-hairline py-2 transition-colors duration-200 hover:text-signal-ink"
                 >
                   {section.label}
                   <span className="tabular-nums">{section.index}</span>
@@ -189,7 +188,7 @@ function GlanceSection() {
               <span>{stat.label}</span>
               <span className="tabular-nums text-mute">{pad(index + 1)}</span>
             </dt>
-            <dd className="mt-8 text-[clamp(3.5rem,7.2vw,8rem)] font-semibold leading-[0.85] tracking-[-0.055em] md:mt-16">
+            <dd className="mt-8 text-display font-semibold leading-[0.85] tracking-[-0.055em] md:mt-16">
               <StatFigure value={stat.value} />
             </dd>
           </Parallax>
@@ -206,7 +205,7 @@ function ProjectTicker() {
       <Ticker
         items={portfolio.projects.map((project) => project.title)}
         speed={90}
-        className="text-[clamp(2.5rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.05em]"
+        className="text-title font-semibold leading-none tracking-[-0.05em]"
       />
     </div>
   );
@@ -229,24 +228,22 @@ function SectionHead({
       <Parallax
         from={-140}
         to={260}
-        lean={10}
         className="pointer-events-none absolute right-0 top-0 select-none"
       >
-        <ChapterNumeral className="text-[clamp(9rem,34vw,36rem)] font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/60">
+        <ChapterNumeral className="text-giant font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/60">
           {index}
         </ChapterNumeral>
       </Parallax>
       <Rule />
       <div className={cn(grid, "relative gap-y-10 pt-4 md:pt-5")}>
         <p className="col-span-4 text-sm font-medium md:col-span-3">
-          <span className="tabular-nums text-signal">{index}</span>
-          <ScrambleText text={label} className="ml-3" />
+          <span className="tabular-nums text-signal-ink">{index}</span>
+          <span className="ml-3">{label}</span>
         </p>
         <Parallax
           axis="x"
           from={320}
           to={0}
-          lean={7}
           offset={["start end", "start 35%"]}
           className="col-span-4 md:col-span-9"
         >
@@ -275,7 +272,7 @@ function AboutSection() {
       <ScrollStatement label="In brief" text={portfolio.summary} />
 
       <Reveal className="flex items-baseline justify-between gap-6 pb-3">
-        <h3 className="text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
+        <h3 className="text-lead font-semibold tracking-[-0.03em]">
           The story so far
         </h3>
         <span className="text-sm tabular-nums text-mute">
@@ -325,7 +322,7 @@ function SkillsSection() {
 
 function ContactSection() {
   return (
-    <section id="contact" className="bg-signal text-white">
+    <section id="contact" className="bg-signal text-on-signal">
       <div className={cn(frame, "pb-10 pt-4 md:pb-14 md:pt-5")}>
         <p className="text-sm font-medium">
           <span className="tabular-nums">{sections[3].index}</span>
@@ -334,33 +331,33 @@ function ContactSection() {
 
         <FlyInLines
           lines={["Open to", "internships", "and ambitious", "technical work."]}
-          className="mt-16 text-[clamp(3rem,11vw,11.5rem)] font-semibold leading-[0.88] tracking-[-0.055em] md:mt-28"
+          className="mt-16 text-poster font-semibold leading-[0.88] tracking-[-0.055em] md:mt-28"
         />
 
-        <div className={cn(grid, "mt-20 items-end gap-y-12 md:mt-32")}>
-          <div className="col-span-4 md:col-span-8">
+        <div className={cn(grid, "mt-20 gap-y-12 md:mt-32")}>
+          <div className="col-span-4 md:col-span-12">
             <p className="text-sm">Write to</p>
             <Magnetic className="mt-3" strength={0.22}>
               <a
                 href={`mailto:${portfolio.email}`}
-                className="inline-block text-[clamp(1.5rem,4.4vw,4.5rem)] font-semibold leading-none tracking-[-0.04em] underline decoration-white/40 decoration-[0.05em] underline-offset-[0.16em] transition-colors duration-200 [overflow-wrap:anywhere] hover:decoration-white focus-visible:outline-white"
+                className="inline-block text-lead font-semibold leading-none tracking-[-0.04em] underline decoration-on-signal/40 decoration-[0.05em] underline-offset-[0.16em] transition-colors duration-200 [overflow-wrap:anywhere] hover:decoration-on-signal focus-visible:outline-on-signal md:text-title md:leading-none"
               >
                 {portfolio.email}
               </a>
             </Magnetic>
           </div>
-          <ul className="col-span-4 border-b border-white/60 text-base font-medium md:col-span-3 md:col-start-10">
+          <ul className="col-span-4 border-b border-on-signal/60 text-base font-medium md:col-span-3 md:col-start-10">
             {portfolio.socials.map((social) => {
               const isMail = social.href.startsWith("mailto:");
 
               return (
-                <li key={social.label} className="border-t border-white/60">
+                <li key={social.label} className="border-t border-on-signal/60">
                   <Magnetic className="w-full" strength={0.12}>
                     <a
                       href={social.href}
                       target={isMail ? undefined : "_blank"}
                       rel={isMail ? undefined : "noopener noreferrer"}
-                      className="group flex items-center justify-between py-3 focus-visible:outline-white"
+                      className="group flex items-center justify-between py-3 focus-visible:outline-on-signal"
                     >
                       {social.label}
                       <ArrowUpRight
@@ -379,7 +376,7 @@ function ContactSection() {
   );
 }
 
-// The top bar of the end credits; the reveal adds the clock and the giant
+// The top bar of the end credits; the reveal adds Cork time and the giant
 // name below it.
 function FooterBar() {
   return (
@@ -390,6 +387,7 @@ function FooterBar() {
       </p>
       <div className="col-span-4 mt-3 flex flex-wrap items-center gap-x-6 gap-y-3 md:col-span-6 md:mt-0 md:justify-end">
         <GridToggle className="focus-visible:outline-paper" />
+        <ThemeToggle className="focus-visible:outline-paper" />
         <MotionToggle className="focus-visible:outline-paper" />
         <ReplayIntro className="focus-visible:outline-paper" />
         <RewindLink className="focus-visible:outline-paper" />

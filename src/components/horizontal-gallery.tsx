@@ -93,7 +93,7 @@ export function HorizontalGallery({
         className={cn(
           // Opaque, so the section heading's drifting numeral can't show through.
           enabled &&
-            "sticky top-14 h-[calc(100svh-3.5rem)] overflow-hidden bg-paper",
+            "@container sticky top-14 h-[calc(100svh-3.5rem)] overflow-hidden bg-paper",
         )}
       >
         <motion.ol
@@ -163,7 +163,15 @@ function Panel({
       className={cn(
         "relative",
         horizontal
-          ? "flex h-full w-[86vw] shrink-0 flex-col overflow-hidden border-l border-ink px-5 pb-24 pt-4 md:w-[72vw] md:px-8 md:pb-28 lg:w-[60vw]"
+          ? cn(
+              "flex h-full shrink-0 flex-col overflow-hidden border-l border-ink px-5 pb-24 pt-4 md:px-8 md:pb-28",
+              // Whole grid columns, gutter included, so each panel's left
+              // rule lands on a column line: 4 on phones, 9 on tablets, 8 on
+              // desktops. (frame + gap) / columns is one column plus a gutter.
+              "w-[calc((min(100cqw,1680px)_-_2*var(--gutter)_+_var(--col-gap))/var(--columns)*4)]",
+              "md:w-[calc((min(100cqw,1680px)_-_2*var(--gutter)_+_var(--col-gap))/var(--columns)*9)]",
+              "lg:w-[calc((min(100cqw,1680px)_-_2*var(--gutter)_+_var(--col-gap))/var(--columns)*8)]",
+            )
           : "border-t border-ink",
       )}
     >
@@ -171,7 +179,7 @@ function Panel({
         <motion.span
           aria-hidden="true"
           style={{ x: numeralX }}
-          className="pointer-events-none absolute -right-[0.04em] top-6 select-none text-[clamp(11rem,42vh,30rem)] font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/70"
+          className="pointer-events-none absolute -right-[0.04em] top-6 select-none text-giant font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/70"
         >
           {pad(index + 1)}
         </motion.span>
@@ -189,7 +197,7 @@ function Panel({
         )}
       >
         <div className="flex items-center gap-4 text-sm">
-          <span className="w-8 shrink-0 font-medium tabular-nums transition-colors duration-200 group-hover:text-signal">
+          <span className="w-8 shrink-0 font-medium tabular-nums transition-colors duration-200 group-hover:text-signal-ink">
             {pad(index + 1)}
           </span>
           <span className="min-w-0 flex-1 truncate text-mute">
@@ -201,7 +209,7 @@ function Panel({
         </div>
 
         <div className={cn(horizontal ? "mt-auto" : "mt-6")}>
-          <h3 className="max-w-[14ch] text-balance text-[clamp(2.25rem,5vw,5.25rem)] font-semibold leading-[0.92] tracking-[-0.05em]">
+          <h3 className="max-w-[14ch] text-balance text-title font-semibold leading-[0.92] tracking-[-0.05em]">
             {project.title}
           </h3>
           <div className="mt-6 grid gap-6 md:mt-8 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:gap-8">
@@ -217,7 +225,7 @@ function Panel({
               <p className="mt-4 text-sm text-mute">
                 {project.tags.join(" / ")}
               </p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 group-hover:text-signal">
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 group-hover:text-signal-ink">
                 GitHub
                 <ArrowUpRight
                   className="size-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"

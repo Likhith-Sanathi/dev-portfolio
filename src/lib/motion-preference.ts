@@ -1,12 +1,12 @@
 import { useSyncExternalStore } from "react";
 
-import { MOTION_STORAGE_KEY } from "@/lib/motion-preference-script";
+import { MOTION_STORAGE_KEY } from "@/lib/preference-script";
 
 // The page is "calm" when the visitor asks for reduced motion, either through
 // their OS setting or the on-page toggle. The toggle can also override the OS
 // setting the other way. The choice lives on <html data-motion> so CSS (the
 // `calm:` variant in globals.css) and JS read the same source of truth; a
-// saved choice is applied before hydration by motion-preference-script.ts.
+// saved choice is applied before hydration by preference-script.ts.
 
 export const MOTION_PREFERENCE_EVENT = "motionpreference";
 const EVENT = MOTION_PREFERENCE_EVENT;

@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 
 import { parseCount, type Count } from "@/lib/count";
 import { useCalm } from "@/lib/motion-preference";
+import { useTheme } from "@/lib/theme-preference";
 
 // Cell grids for each kind of stat, as columns × rows.
 function layout(count: Count) {
@@ -27,6 +28,7 @@ export function StatFigure({ value }: { value: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const calm = useCalm();
+  const theme = useTheme();
   const count = parseCount(value);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -132,7 +134,8 @@ export function StatFigure({ value }: { value: string }) {
     });
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, [calm, progress]);
+    // The theme is a dependency so a switch re-reads the palette.
+  }, [calm, progress, theme]);
 
   return (
     <div ref={ref}>

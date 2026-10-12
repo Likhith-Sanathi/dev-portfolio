@@ -5,16 +5,13 @@ import {
   animate,
   motion,
   useMotionValue,
-  useMotionValueEvent,
   useScroll,
-  useSpring,
   useTransform,
   type MotionValue,
 } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 import { REPLAY_INTRO_EVENT } from "@/components/replay-intro";
-import { TextRing } from "@/components/text-ring";
 import { frame, grid } from "@/lib/grid";
 import { MOTION_PREFERENCE_EVENT, useCalm } from "@/lib/motion-preference";
 import { cn } from "@/lib/utils";
@@ -27,21 +24,11 @@ const SCATTER: Range = [0.02, 0.3];
 const ZOOM: Range = [0.15, 0.42];
 const STATEMENT: Range = [0.4, 0.6];
 
-// Fixed per-letter flight, so the name breaks apart unevenly but repeatably:
-// vertical distance (vh), sideways drift (vw), spin (deg), and depth for the
-// pointer parallax.
-const firstFlight = {
-  rise: [0.95, 0.4, 1.25, 0.65, 1.1, 0.5, 0.85],
-  drift: [-14, -7, -11, -2, 5, 3, 12],
-  spin: [-38, 24, -14, 52, -26, 18, -44],
-  depth: [0.7, 1.6, 1, 2, 0.8, 1.4, 1.1],
-};
-const lastFlight = {
-  rise: [0.55, 1.15, 0.75, 1.35, 0.45, 1, 0.7],
-  drift: [-12, -4, -9, 2, 7, 10, 15],
-  spin: [30, -48, 16, -22, 40, -12, 34],
-  depth: [1.3, 0.8, 1.8, 0.9, 1.5, 0.7, 1.2],
-};
+// How far each letter travels, as a share of 110vh, so the name breaks apart
+// unevenly but repeatably. Letters only ever move straight up or down: the
+// first name rises, the last name falls, keeping to the grid's vertical axis.
+const firstRise = [0.95, 0.4, 1.25, 0.65, 1.1, 0.5, 0.85];
+const lastRise = [0.55, 1.15, 0.75, 1.35, 0.45, 1, 0.7];
 const metaSpeeds = [0.5, 1.1, 0.75, 1.4];
 
 type Range = [number, number];
@@ -69,18 +56,14 @@ export function HeroStage({
   last,
   meta,
   statement,
-  ring,
 }: {
   first: string;
   last: string;
   meta: readonly { label: string; content: React.ReactNode }[];
   statement: string;
-  // Set round the turning badge in the corner of the stage.
-  ring: string;
 }) {
   const runwayRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
   const dotRef = useRef<HTMLSpanElement>(null);
   // Generous until measured, so the opening red always covers the stage.
   const [cover, setCover] = useState(140);
@@ -206,59 +189,6 @@ export function HeroStage({
     return () => window.removeEventListener(REPLAY_INTRO_EVENT, onReplay);
   }, [count, intro]);
 
-  // Pointer position, -1 to 1 on each axis, eased so the letters float. On
-  // phones that allow it without a permission prompt, tilting does the same.
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const floatX = useSpring(pointerX, { stiffness: 70, damping: 18, mass: 0.6 });
-  const floatY = useSpring(pointerY, { stiffness: 70, damping: 18, mass: 0.6 });
-  // The pointer in the heading's own coordinates, for letters to dodge.
-  const cursorX = useMotionValue(-10000);
-  const cursorY = useMotionValue(-10000);
-
-  useEffect(() => {
-    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      function onMove(event: PointerEvent) {
-        pointerX.set((event.clientX / window.innerWidth) * 2 - 1);
-        pointerY.set((event.clientY / window.innerHeight) * 2 - 1);
-        const heading = headingRef.current?.getBoundingClientRect();
-        if (heading) {
-          cursorX.set(event.clientX - heading.left);
-          cursorY.set(event.clientY - heading.top);
-        }
-      }
-      function onLeave() {
-        cursorX.set(-10000);
-        cursorY.set(-10000);
-      }
-      window.addEventListener("pointermove", onMove, { passive: true });
-      document.documentElement.addEventListener("pointerleave", onLeave);
-      return () => {
-        window.removeEventListener("pointermove", onMove);
-        document.documentElement.removeEventListener("pointerleave", onLeave);
-      };
-    }
-
-    // iOS gates orientation behind a permission prompt; skip it rather than ask.
-    const orientation = window.DeviceOrientationEvent as unknown as
-      | { requestPermission?: () => Promise<string> }
-      | undefined;
-    if (!orientation || typeof orientation.requestPermission === "function") {
-      return;
-    }
-    let restingBeta: number | null = null;
-    function onTilt(event: DeviceOrientationEvent) {
-      if (event.gamma === null || event.beta === null) {
-        return;
-      }
-      restingBeta ??= event.beta;
-      pointerX.set(Math.max(-1, Math.min(1, event.gamma / 25)));
-      pointerY.set(Math.max(-1, Math.min(1, (event.beta - restingBeta) / 25)));
-    }
-    window.addEventListener("deviceorientation", onTilt);
-    return () => window.removeEventListener("deviceorientation", onTilt);
-  }, [pointerX, pointerY, cursorX, cursorY]);
-
   const { scrollYProgress } = useScroll({
     target: runwayRef,
     offset: ["start 56px", "end end"],
@@ -273,18 +203,15 @@ export function HeroStage({
   const labelOpacity = useTransform(scrollYProgress, (value) =>
     phase(value, [STATEMENT[0], STATEMENT[0] + 0.05]),
   );
-  const ringOpacity = useTransform(scrollYProgress, (value) =>
-    1 - phase(value, [ZOOM[0], ZOOM[0] + 0.08]),
-  );
   const words = statement.split(" ");
   const step = (STATEMENT[1] - STATEMENT[0] - 0.06) / words.length;
   const nameIn = introStage !== "count";
 
   const lines = [
-    { text: first, flight: firstFlight, direction: -1, delay: 0.25, thins: true },
+    { text: first, rises: firstRise, direction: -1, delay: 0.25, thins: true },
     // The last name keeps its weight: it carries the full stop the zoom is
     // centred on, and thinner letters would slide it out of place.
-    { text: last, flight: lastFlight, direction: 1, delay: 0.35, thins: false },
+    { text: last, rises: lastRise, direction: 1, delay: 0.35, thins: false },
   ];
 
   return (
@@ -319,7 +246,6 @@ export function HeroStage({
           </div>
 
           <motion.h1
-            ref={headingRef}
             initial="hidden"
             animate={nameIn ? "show" : "hidden"}
             aria-label={`${first} ${last}`}
@@ -329,48 +255,19 @@ export function HeroStage({
               <span
                 key={line.text}
                 aria-hidden="true"
-                className={cn(
-                  "whitespace-nowrap",
-                  lineIndex === 0 ? "flex items-center justify-between" : "block",
-                )}
+                className="block whitespace-nowrap"
               >
-                <span>
-                {line.text.split("").map((letter, index) => {
-                  const pick = (values: number[]) => values[index % values.length];
-
-                  return (
-                    <Letter
-                      key={index}
-                      progress={scrollYProgress}
-                      pointerX={floatX}
-                      pointerY={floatY}
-                      cursorX={cursorX}
-                      cursorY={cursorY}
-                      headingRef={headingRef}
-                      rise={line.direction * pick(line.flight.rise) * 110}
-                      drift={pick(line.flight.drift)}
-                      spin={pick(line.flight.spin)}
-                      depth={pick(line.flight.depth)}
-                      thins={line.thins}
-                      delay={line.delay + index * 0.035}
-                    >
-                      {letter}
-                    </Letter>
-                  );
-                })}
-                </span>
-                {lineIndex === 0 ? (
-                  // The turning badge fills the space the shorter first line
-                  // leaves at the right edge, sized to the type.
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: introStage === "done" ? 1 : 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="inline-block size-[0.46em] shrink-0"
+                {line.text.split("").map((letter, index) => (
+                  <Letter
+                    key={index}
+                    progress={scrollYProgress}
+                    rise={line.direction * line.rises[index % line.rises.length] * 110}
+                    thins={line.thins}
+                    delay={line.delay + index * 0.035}
                   >
-                    <TextRing text={`${ring} · `} opacity={ringOpacity} className="size-full" />
-                  </motion.span>
-                ) : null}
+                    {letter}
+                  </Letter>
+                ))}
                 {lineIndex === lines.length - 1 ? (
                   // The full stop: a red square that floods the stage.
                   <span
@@ -404,7 +301,7 @@ export function HeroStage({
           </motion.div>
         </div>
 
-        <div className="pointer-events-none absolute inset-0 z-20 flex items-center text-white calm:static calm:bg-signal calm:py-24">
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center text-on-signal calm:static calm:bg-signal calm:py-24">
           <div className={cn(frame, grid, "w-full gap-y-6")}>
             <motion.p
               data-scroll-fade
@@ -413,7 +310,7 @@ export function HeroStage({
             >
               In short
             </motion.p>
-            <p className="col-span-4 text-pretty text-[clamp(2.25rem,5.4vw,6.25rem)] font-semibold leading-none tracking-[-0.045em] md:col-span-9">
+            <p className="col-span-4 text-pretty text-title font-semibold leading-none tracking-[-0.045em] md:col-span-9">
               {words.map((word, index) => (
                 <StatementWord
                   key={index}
@@ -430,10 +327,10 @@ export function HeroStage({
           </div>
         </div>
 
-        {/* The opening counter, set in white on the flooded stage. */}
+        {/* The opening counter, set in paper white on the flooded stage. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-30 text-white calm:hidden"
+          className="pointer-events-none absolute inset-0 z-30 text-on-signal calm:hidden"
         >
           <div
             className={cn(
@@ -459,7 +356,7 @@ export function HeroStage({
                 animate={{ y: introStage === "count" ? "0%" : "-105%" }}
                 transition={{ duration: 0.75, ease }}
                 style={{ fontWeight: counterWeight }}
-                className="block text-[clamp(7rem,30vw,30rem)] leading-[0.8] tracking-[-0.06em] tabular-nums"
+                className="block text-giant leading-[0.8] tracking-[-0.06em] tabular-nums"
               >
                 {counter}
               </motion.span>
@@ -510,93 +407,20 @@ function MetaColumn({
 
 function Letter({
   progress,
-  pointerX,
-  pointerY,
-  cursorX,
-  cursorY,
-  headingRef,
   rise: distance,
-  drift,
-  spin,
-  depth,
   thins,
   delay,
   children,
 }: {
   progress: MotionValue<number>;
-  pointerX: MotionValue<number>;
-  pointerY: MotionValue<number>;
-  cursorX: MotionValue<number>;
-  cursorY: MotionValue<number>;
-  headingRef: React.RefObject<HTMLHeadingElement | null>;
   rise: number;
-  drift: number;
-  spin: number;
-  depth: number;
   thins: boolean;
   delay: number;
   children: string;
 }) {
-  // Where the letter rests, relative to the heading, and the type size.
-  const anchorRef = useRef<HTMLSpanElement>(null);
-  const [anchor, setAnchor] = useState({ x: 0, y: 0, size: 0 });
-
-  useEffect(() => {
-    const heading = headingRef.current;
-    const letter = anchorRef.current;
-    if (!heading || !letter) {
-      return;
-    }
-    const observer = new ResizeObserver(() => {
-      const h = heading.getBoundingClientRect();
-      const l = letter.getBoundingClientRect();
-      setAnchor({
-        x: l.left - h.left + l.width / 2,
-        y: l.top - h.top + l.height / 2,
-        size: parseFloat(getComputedStyle(heading).fontSize),
-      });
-    });
-    observer.observe(heading);
-    return () => observer.disconnect();
-  }, [headingRef]);
-
-  // Letters near the pointer are pushed away from it and spring back.
-  const dodgeX = useSpring(0, { stiffness: 180, damping: 14, mass: 0.5 });
-  const dodgeY = useSpring(0, { stiffness: 180, damping: 14, mass: 0.5 });
-
-  function dodge() {
-    const dx = anchor.x - cursorX.get();
-    const dy = anchor.y - cursorY.get();
-    const reach = Math.hypot(dx, dy);
-    const radius = anchor.size * 0.9;
-    if (!anchor.size || reach === 0 || reach >= radius) {
-      dodgeX.set(0);
-      dodgeY.set(0);
-      return;
-    }
-    const push = (1 - reach / radius) ** 2 * anchor.size * 0.32;
-    dodgeX.set((dx / reach) * push);
-    dodgeY.set((dy / reach) * push);
-  }
-
-  useMotionValueEvent(cursorX, "change", dodge);
-  useMotionValueEvent(cursorY, "change", dodge);
-
-  // Scroll throws each letter on its own path; the pointer adds a small
-  // counter-movement scaled by depth, so the name reads as layered, and the
-  // dodge fades out as the letters fly.
-  const x = useTransform([progress, pointerX, dodgeX], ([value, pointer, push]) => {
-    const t = phase(value as number, SCATTER) ** 1.6;
-    const offset = (pointer as number) * depth * -22 + (push as number) * (1 - t);
-    return `calc(${t * drift}vw + ${offset}px)`;
-  });
-  const y = useTransform([progress, pointerY, dodgeY], ([value, pointer, push]) => {
-    const t = phase(value as number, SCATTER) ** 1.6;
-    const offset = (pointer as number) * depth * -14 + (push as number) * (1 - t);
-    return `calc(${t * distance}vh + ${offset}px)`;
-  });
-  const rotate = useTransform(progress, (value) =>
-    phase(value, SCATTER) ** 1.6 * spin,
+  const y = useTransform(
+    progress,
+    (value) => `${phase(value, SCATTER) ** 1.6 * distance}vh`,
   );
   // Letters that thin out lose weight as they fly, down to a hairline.
   const fontWeight = useTransform(progress, (value) =>
@@ -604,22 +428,20 @@ function Letter({
   );
 
   return (
-    <span ref={anchorRef} className="inline-block">
+    <motion.span
+      data-parallax
+      data-weight
+      style={{ y, fontWeight }}
+      className="inline-block"
+    >
       <motion.span
-        data-parallax
-        data-weight
-        style={{ x, y, rotate, fontWeight }}
+        variants={rise}
+        transition={{ duration: 0.8, delay, ease }}
         className="inline-block"
       >
-        <motion.span
-          variants={rise}
-          transition={{ duration: 0.8, delay, ease }}
-          className="inline-block"
-        >
-          {children}
-        </motion.span>
+        {children}
       </motion.span>
-    </span>
+    </motion.span>
   );
 }
 
