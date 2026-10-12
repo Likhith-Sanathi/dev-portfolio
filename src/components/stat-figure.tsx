@@ -10,7 +10,10 @@ import { useTheme } from "@/lib/theme-preference";
 // Cell grids for each kind of stat, as columns × rows.
 function layout(count: Count) {
   if (count.kind === "placing") {
-    return { columns: Math.ceil(count.field / 2), rows: 2, cells: count.field };
+    // Up to 20 columns, then as many rows as the field needs, so a large field
+    // stays a block rather than a thin strip.
+    const columns = Math.min(20, count.field);
+    return { columns, rows: Math.ceil(count.field / columns), cells: count.field };
   }
   if (count.kind === "share") {
     return { columns: 50, rows: 20, cells: 1000 };
