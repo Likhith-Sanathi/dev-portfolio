@@ -18,6 +18,20 @@
   --mute: #5f5e59;
   --hairline: #cfcdc5;
   --signal: #d32a1d;
+  /* Matches the frame padding in src/lib/grid.ts. */
+  --gutter: 1rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --gutter: 2rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --gutter: 2.5rem;
+  }
 }
 
 @layer base {
@@ -28,6 +42,7 @@
   }
 
   body {
+    overflow-x: clip;
     background-color: var(--paper);
     color: var(--ink);
     font-family: var(--font-sans);
@@ -53,5 +68,15 @@
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* Scroll-linked effects write inline styles, so neutralise them here. */
+  [data-parallax] {
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  [data-scroll-word] {
+    opacity: 1 !important;
   }
 }

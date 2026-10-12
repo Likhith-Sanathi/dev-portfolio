@@ -1,29 +1,33 @@
 import { ArrowUp, ArrowUpRight } from "lucide-react";
 
+import { ExpandingSection } from "@/components/expanding-section";
 import { GridToggle } from "@/components/grid-toggle";
+import { HeroName } from "@/components/hero-name";
 import { LenisProvider } from "@/components/lenis-provider";
 import { LocalTime } from "@/components/local-time";
 import { MaskText } from "@/components/mask-text";
 import { MotionProvider } from "@/components/motion-provider";
+import { Parallax } from "@/components/parallax";
 import { Reveal, Rule } from "@/components/reveal";
 import { ScrollProgress } from "@/components/scroll-progress";
+import { ScrollStatement } from "@/components/scroll-statement";
+import { SectionNav } from "@/components/section-nav";
+import { SkillRows } from "@/components/skill-rows";
+import { Timeline } from "@/components/timeline";
 import { frame, grid } from "@/lib/grid";
 import { portfolio } from "@/lib/portfolio-content";
-import { cn } from "@/lib/utils";
+import { timeline } from "@/lib/timeline";
+import { cn, pad } from "@/lib/utils";
 
 const [firstName, lastName] = portfolio.name.split(" ");
 
 const sections = portfolio.nav.map((item, index) => ({
   ...item,
-  index: String(index + 1).padStart(2, "0"),
+  index: pad(index + 1),
 }));
 
 const sectionTitle =
   "text-[clamp(2.75rem,6.6vw,7.25rem)] font-semibold leading-[0.92] tracking-[-0.05em]";
-
-function pad(value: number) {
-  return String(value).padStart(2, "0");
-}
 
 export default function Home() {
   return (
@@ -56,23 +60,7 @@ function SiteHeader() {
           <span aria-hidden="true" className="size-3 shrink-0 bg-signal" />
           {portfolio.name}
         </a>
-        <nav
-          aria-label="Sections"
-          className="hidden md:col-span-8 md:grid md:grid-cols-subgrid"
-        >
-          {sections.map((section) => (
-            <a
-              key={section.href}
-              href={section.href}
-              className="group col-span-2 flex gap-2 transition-colors duration-200 hover:text-signal"
-            >
-              <span className="hidden tabular-nums text-mute transition-colors duration-200 group-hover:text-signal lg:inline">
-                {section.index}
-              </span>
-              {section.label}
-            </a>
-          ))}
-        </nav>
+        <SectionNav sections={sections} />
         <a
           href={`mailto:${portfolio.email}`}
           className="col-span-1 inline-flex items-center gap-1 justify-self-end font-medium transition-colors duration-200 hover:text-signal"
@@ -89,7 +77,12 @@ function HeroSection() {
   const [education] = portfolio.education;
 
   return (
-    <section className={cn(frame, "@container pb-20 pt-6 md:pb-32 md:pt-8")}>
+    <section
+      className={cn(
+        frame,
+        "@container overflow-x-clip pb-20 pt-6 md:pb-32 md:pt-8",
+      )}
+    >
       <Reveal className={cn(grid, "gap-y-6 text-sm leading-snug")}>
         <HeroMeta label="Discipline">{portfolio.role}</HeroMeta>
         <HeroMeta label="Studying">{education.institution}</HeroMeta>
@@ -109,17 +102,10 @@ function HeroSection() {
         </HeroMeta>
       </Reveal>
 
-      <MaskText
-        as="h1"
-        lines={[
-          firstName,
-          <span key="last-name">
-            {lastName}
-            <span className="text-signal">.</span>
-          </span>,
-        ]}
+      <HeroName
+        first={firstName}
+        last={lastName}
         className="-ml-[0.06em] mt-12 text-[length:min(100cqw/3.4,(100svh_-_15rem)/1.62)] font-semibold leading-[0.8] tracking-[-0.065em] md:mt-14"
-        delay={0.1}
       />
 
       <Rule className="mt-10 md:mt-14" delay={0.3} />
@@ -154,12 +140,15 @@ function HeroSection() {
         </nav>
       </div>
 
+      {/* The three numbers arrive as a staircase and settle onto one line. */}
       <dl className={cn(grid, "mt-20 gap-y-10 md:mt-32")}>
         {portfolio.stats.map((stat, index) => (
-          <Reveal
+          <Parallax
             key={stat.label}
-            delay={index * 0.08}
-            className="col-span-4 border-t border-ink pt-3"
+            from={index * 110}
+            to={0}
+            offset={["start end", "start 45%"]}
+            className="col-span-4 border-t border-ink pt-3 max-md:transform-none!"
           >
             <dt className="flex justify-between gap-4 text-sm">
               <span>{stat.label}</span>
@@ -168,7 +157,7 @@ function HeroSection() {
             <dd className="mt-8 text-[clamp(3.25rem,6.4vw,6.5rem)] font-semibold leading-[0.85] tracking-[-0.055em] md:mt-14">
               {stat.value}
             </dd>
-          </Reveal>
+          </Parallax>
         ))}
       </dl>
     </section>
@@ -207,77 +196,17 @@ function SectionHead({
           <span className="tabular-nums text-signal">{index}</span>
           <span className="ml-3">{label}</span>
         </p>
-        <MaskText
-          text={title}
-          className={cn(sectionTitle, "col-span-4 md:col-span-9")}
-        />
+        <Parallax from={56} to={-56} className="col-span-4 md:col-span-9">
+          <MaskText text={title} className={sectionTitle} />
+        </Parallax>
       </div>
     </>
   );
 }
 
-function SubBlock({
-  title,
-  count,
-  children,
-}: {
-  title: string;
-  count: number;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="mt-20 md:mt-32">
-      <Reveal className="flex items-baseline justify-between gap-6 pb-3">
-        <h3 className="text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
-          {title}
-        </h3>
-        <span className="text-sm tabular-nums text-mute">({pad(count)})</span>
-      </Reveal>
-      <Rule />
-      <div className="divide-y divide-hairline">{children}</div>
-    </div>
-  );
-}
-
-function Entry({
-  meta,
-  title,
-  subtitle,
-  children,
-}: {
-  meta: readonly string[];
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Reveal className={cn(grid, "gap-y-4 py-6 md:py-8")}>
-      <div className="col-span-4 text-sm md:col-span-3">
-        {meta.map((line, index) => (
-          <p
-            key={line}
-            className={cn("tabular-nums", index > 0 && "text-mute")}
-          >
-            {line}
-          </p>
-        ))}
-      </div>
-      <div className="col-span-4 md:col-span-9 lg:col-span-4">
-        <h4 className="text-balance text-2xl font-semibold leading-[1.05] tracking-[-0.03em] md:text-[1.75rem]">
-          {title}
-        </h4>
-        {subtitle ? (
-          <p className="mt-2 text-base text-mute">{subtitle}</p>
-        ) : null}
-      </div>
-      <div className="col-span-4 text-base leading-relaxed md:col-span-9 md:col-start-4 lg:col-span-5 lg:col-start-8">
-        {children}
-      </div>
-    </Reveal>
-  );
-}
-
 function AboutSection() {
+  const years = timeline.map((event) => event.year);
+
   return (
     <section id="about" className={cn(frame, "pb-24 md:pb-40")}>
       <SectionHead
@@ -286,68 +215,20 @@ function AboutSection() {
         title="Built through shipping."
       />
 
-      <div className={cn(grid, "mt-10 md:mt-16")}>
-        <Reveal className="col-span-4 md:col-span-8 md:col-start-4 lg:col-span-6 lg:col-start-4">
-          <p className="text-pretty text-xl font-medium leading-snug tracking-[-0.02em] md:text-2xl">
-            {portfolio.summary}
-          </p>
-        </Reveal>
+      <ScrollStatement label="In brief" text={portfolio.summary} />
+
+      <Reveal className="flex items-baseline justify-between gap-6 pb-3">
+        <h3 className="text-2xl font-semibold tracking-[-0.03em] md:text-3xl">
+          The story so far
+        </h3>
+        <span className="text-sm tabular-nums text-mute">
+          {years[0]} to {years[years.length - 1]}
+        </span>
+      </Reveal>
+      <Rule />
+      <div className="lg:mt-12">
+        <Timeline events={timeline} />
       </div>
-
-      <SubBlock title="Experience" count={portfolio.experience.length}>
-        {portfolio.experience.map((item) => (
-          <Entry
-            key={item.period}
-            meta={[item.period, item.location]}
-            title={item.title}
-            subtitle={item.company}
-          >
-            <p>{item.description}</p>
-            <ol className="mt-6 space-y-4 text-mute">
-              {item.highlights.map((highlight, index) => (
-                <li key={highlight} className="flex gap-4">
-                  <span className="w-5 shrink-0 tabular-nums text-ink">
-                    {pad(index + 1)}
-                  </span>
-                  <span>{highlight}</span>
-                </li>
-              ))}
-            </ol>
-          </Entry>
-        ))}
-      </SubBlock>
-
-      <SubBlock title="Education" count={portfolio.education.length}>
-        {portfolio.education.map((item) => (
-          <Entry
-            key={item.institution}
-            meta={[item.period, item.location]}
-            title={item.institution}
-            subtitle={`${item.degree}. ${item.detail}.`}
-          >
-            <p className="text-sm text-mute">Relevant coursework</p>
-            <ul className="mt-3 grid grid-cols-1 gap-x-6 border-t border-ink sm:grid-cols-2">
-              {item.coursework.map((course) => (
-                <li key={course} className="border-b border-hairline py-2">
-                  {course}
-                </li>
-              ))}
-            </ul>
-          </Entry>
-        ))}
-      </SubBlock>
-
-      <SubBlock title="Recognition" count={portfolio.achievements.length}>
-        {portfolio.achievements.map((achievement) => (
-          <Entry
-            key={achievement.title}
-            meta={[achievement.period]}
-            title={achievement.title}
-          >
-            <p>{achievement.detail}</p>
-          </Entry>
-        ))}
-      </SubBlock>
     </section>
   );
 }
@@ -367,70 +248,69 @@ function ProjectsSection() {
           ({pad(portfolio.projects.length)})
         </span>
       </div>
+      {/* On tall enough desktops the cards pin and stack like an index file,
+          each leaving its tab strip showing above the next. */}
       <ol className="border-b border-ink">
         {portfolio.projects.map((project, index) => (
-          <li key={project.title}>
-            <Reveal>
-              <a
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${project.title}, view on GitHub`}
-                className="group relative block border-t border-ink py-6 focus-visible:outline-offset-[-2px] md:py-10"
-              >
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-x-0 -top-px h-[3px] origin-left scale-x-0 bg-signal transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
-                />
-                <div className={cn(grid, "gap-y-5")}>
-                  <span className="col-span-2 text-sm font-medium tabular-nums transition-colors duration-200 group-hover:text-signal md:col-span-1">
-                    {pad(index + 1)}
-                  </span>
-                  <span className="col-span-2 flex items-center justify-end gap-3 text-sm md:hidden">
-                    <span className="tabular-nums text-mute">
-                      {project.year}
-                    </span>
+          <li
+            key={project.title}
+            id={`project-${pad(index + 1)}`}
+            className="bg-paper [@media(min-width:64rem)_and_(min-height:44rem)]:sticky"
+            style={{ top: `calc(3.5rem + ${index} * 3rem)` }}
+          >
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${project.title}, view on GitHub`}
+              className="group relative block border-t border-ink focus-visible:outline-offset-[-2px]"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-0 -top-px h-[3px] origin-left scale-x-0 bg-signal transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
+              />
+              <div className="flex h-12 items-center gap-4 text-sm">
+                <span className="w-8 shrink-0 font-medium tabular-nums transition-colors duration-200 group-hover:text-signal">
+                  {pad(index + 1)}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-mute">
+                  {project.type}
+                </span>
+                <span className="shrink-0 tabular-nums text-mute">
+                  <span className="md:hidden">{project.year}</span>
+                  <span className="hidden md:inline">{project.period}</span>
+                </span>
+              </div>
+              <div className={cn(grid, "gap-y-5 pb-8 pt-2 md:pb-12")}>
+                <h3 className="col-span-4 text-balance text-[clamp(2rem,3.6vw,3.5rem)] font-semibold leading-[0.95] tracking-[-0.045em] md:col-span-6">
+                  {project.title}
+                </h3>
+                <div className="col-span-4 md:col-span-4">
+                  <p className="text-base leading-relaxed">
+                    {project.description}
+                  </p>
+                  <p className="mt-5 flex gap-3 text-base font-medium leading-snug">
+                    <span
+                      aria-hidden="true"
+                      className="mt-[0.45em] size-2 shrink-0 bg-signal"
+                    />
+                    {project.impact}
+                  </p>
+                  <p className="mt-5 text-sm text-mute">
+                    {project.tags.join(" / ")}
+                  </p>
+                </div>
+                <div className="col-span-4 flex items-end md:col-span-2 md:justify-end">
+                  <span className="inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 group-hover:text-signal">
+                    GitHub
                     <ArrowUpRight
-                      className="size-5 transition-colors duration-200 group-hover:text-signal"
+                      className="size-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                       strokeWidth={1.75}
                     />
                   </span>
-                  <div className="col-span-4 md:col-span-5">
-                    <h3 className="text-balance text-[clamp(2rem,3.6vw,3.5rem)] font-semibold leading-[0.95] tracking-[-0.045em]">
-                      {project.title}
-                    </h3>
-                    <p className="mt-3 text-sm text-mute">{project.type}</p>
-                  </div>
-                  <div className="col-span-4 md:col-span-4">
-                    <p className="text-base leading-relaxed">
-                      {project.description}
-                    </p>
-                    <p className="mt-5 flex gap-3 text-base font-medium leading-snug">
-                      <span
-                        aria-hidden="true"
-                        className="mt-[0.45em] size-2 shrink-0 bg-signal"
-                      />
-                      {project.impact}
-                    </p>
-                    <p className="mt-5 text-sm text-mute">
-                      {project.tags.join(" / ")}
-                    </p>
-                  </div>
-                  <div className="hidden flex-col items-end justify-between gap-6 text-sm md:col-span-2 md:flex">
-                    <span className="text-right tabular-nums text-mute">
-                      {project.period}
-                    </span>
-                    <span className="inline-flex items-center gap-1 font-medium transition-colors duration-200 group-hover:text-signal">
-                      GitHub
-                      <ArrowUpRight
-                        className="size-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                        strokeWidth={1.75}
-                      />
-                    </span>
-                  </div>
                 </div>
-              </a>
-            </Reveal>
+              </div>
+            </a>
           </li>
         ))}
       </ol>
@@ -440,38 +320,16 @@ function ProjectsSection() {
 
 function SkillsSection() {
   return (
-    <section id="skills" className={cn(frame, "pb-24 md:pb-40")}>
-      <SectionHead
-        index="03"
-        label={sections[2].label}
-        title="Technical range, grounded in practice."
-      />
-
-      <div className={cn(grid, "mt-16 gap-y-14 md:mt-24")}>
-        {portfolio.skillGroups.map((group, index) => (
-          <Reveal
-            key={group.title}
-            delay={index * 0.06}
-            className="col-span-2 md:col-span-6 lg:col-span-3"
-          >
-            <div className="flex items-baseline justify-between border-t border-ink pt-3 text-sm">
-              <h3 className="font-medium">{group.title}</h3>
-              <span className="tabular-nums text-mute">
-                ({pad(group.items.length)})
-              </span>
-            </div>
-            <ul className="mt-5">
-              {group.items.map((item) => (
-                <li
-                  key={item}
-                  className="border-b border-hairline py-2 text-lg font-medium tracking-[-0.02em] md:text-xl"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        ))}
+    <section id="skills" className="pb-24 md:pb-40">
+      <div className={frame}>
+        <SectionHead
+          index="03"
+          label={sections[2].label}
+          title="Technical range, grounded in practice."
+        />
+      </div>
+      <div className="mt-16 md:mt-24">
+        <SkillRows groups={portfolio.skillGroups} />
       </div>
     </section>
   );
@@ -479,20 +337,19 @@ function SkillsSection() {
 
 function ContactSection() {
   return (
-    <section id="contact" className="bg-signal text-white">
+    <ExpandingSection id="contact" className="bg-signal text-white">
       <div className={cn(frame, "pb-10 pt-4 md:pb-14 md:pt-5")}>
         <p className="text-sm font-medium">
           <span className="tabular-nums">{sections[3].index}</span>
           <span className="ml-3">{sections[3].label}</span>
         </p>
 
-        <MaskText
-          text="Open to internships and ambitious technical work."
-          className="mt-16 max-w-[13ch] text-[clamp(3rem,8.6vw,9.5rem)] font-semibold leading-[0.9] tracking-[-0.055em] md:mt-28"
-        />
+        <h2 className="mt-16 max-w-[13ch] text-[clamp(3rem,8.6vw,9.5rem)] font-semibold leading-[0.9] tracking-[-0.055em] md:mt-28">
+          Open to internships and ambitious technical work.
+        </h2>
 
         <div className={cn(grid, "mt-20 items-end gap-y-12 md:mt-32")}>
-          <Reveal className="col-span-4 md:col-span-8">
+          <div className="col-span-4 md:col-span-8">
             <p className="text-sm">Write to</p>
             <a
               href={`mailto:${portfolio.email}`}
@@ -500,37 +357,32 @@ function ContactSection() {
             >
               {portfolio.email}
             </a>
-          </Reveal>
-          <Reveal
-            className="col-span-4 md:col-span-3 md:col-start-10"
-            delay={0.08}
-          >
-            <ul className="border-b border-white/60 text-base font-medium">
-              {portfolio.socials.map((social) => {
-                const isMail = social.href.startsWith("mailto:");
+          </div>
+          <ul className="col-span-4 border-b border-white/60 text-base font-medium md:col-span-3 md:col-start-10">
+            {portfolio.socials.map((social) => {
+              const isMail = social.href.startsWith("mailto:");
 
-                return (
-                  <li key={social.label}>
-                    <a
-                      href={social.href}
-                      target={isMail ? undefined : "_blank"}
-                      rel={isMail ? undefined : "noopener noreferrer"}
-                      className="group flex items-center justify-between border-t border-white/60 py-3 focus-visible:outline-white"
-                    >
-                      {social.label}
-                      <ArrowUpRight
-                        className="size-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                        strokeWidth={1.75}
-                      />
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </Reveal>
+              return (
+                <li key={social.label}>
+                  <a
+                    href={social.href}
+                    target={isMail ? undefined : "_blank"}
+                    rel={isMail ? undefined : "noopener noreferrer"}
+                    className="group flex items-center justify-between border-t border-white/60 py-3 focus-visible:outline-white"
+                  >
+                    {social.label}
+                    <ArrowUpRight
+                      className="size-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                      strokeWidth={1.75}
+                    />
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
-    </section>
+    </ExpandingSection>
   );
 }
 
