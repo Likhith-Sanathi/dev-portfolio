@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { frame, grid } from "@/lib/grid";
 import { cn } from "@/lib/utils";
@@ -50,24 +51,28 @@ export function GridToggle({ className }: { className?: string }) {
         {visible ? "Hide grid" : "Show grid"}
         <kbd className="hidden font-sans opacity-60 md:inline">G</kbd>
       </button>
-      {visible ? (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-[60]"
-        >
-          <div className={cn(frame, grid, "h-full")}>
-            {Array.from({ length: 12 }, (_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "h-full bg-signal/10 outline outline-1 -outline-offset-1 outline-signal/30",
-                  index >= 4 && "hidden md:block",
-                )}
-              />
-            ))}
-          </div>
-        </div>
-      ) : null}
+      {/* Portalled so the footer's stacking context can't bury it. */}
+      {visible
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed inset-0 z-[60]"
+            >
+              <div className={cn(frame, grid, "h-full")}>
+                {Array.from({ length: 12 }, (_, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "h-full bg-signal/10 outline outline-1 -outline-offset-1 outline-signal/30",
+                      index >= 4 && "hidden md:block",
+                    )}
+                  />
+                ))}
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

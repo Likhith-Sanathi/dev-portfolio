@@ -76,7 +76,7 @@
     clip-path: none !important;
   }
 
-  [data-scroll-word] {
+  [data-scroll-fade] {
     opacity: 1 !important;
   }
 }

@@ -11,9 +11,9 @@ import { useRef } from "react";
 import { grid } from "@/lib/grid";
 import { cn } from "@/lib/utils";
 
-// Pins a statement to the viewport and inks it in word by word as the reader
-// scrolls, so it is read at the pace of the scroll. Reduced-motion visitors
-// get the plain paragraph without the pinned runway (see globals.css).
+// Pins a statement to the viewport and inks it in word by word, each word
+// rising into place, so it is read at the pace of the scroll. Reduced-motion
+// visitors get the plain paragraph without the pinned runway (globals.css).
 export function ScrollStatement({
   label,
   text,
@@ -63,14 +63,20 @@ function Word({
   // A function transform keeps this on Motion's JS path. The range form gets
   // offloaded to a native scroll timeline that mis-maps these sub-ranges, so
   // words faded back out once the reader scrolled past them.
-  const opacity = useTransform(progress, (value) => {
-    const t = Math.min(1, Math.max(0, (value - range[0]) / (range[1] - range[0])));
-    return 0.14 + 0.86 * t;
-  });
+  const t = useTransform(progress, (value) =>
+    Math.min(1, Math.max(0, (value - range[0]) / (range[1] - range[0]))),
+  );
+  const opacity = useTransform(t, (value) => 0.14 + 0.86 * value);
+  const y = useTransform(t, (value) => `${(1 - value) * 0.45}em`);
 
   return (
     <>
-      <motion.span data-scroll-word style={{ opacity }}>
+      <motion.span
+        data-parallax
+        data-scroll-fade
+        style={{ opacity, y }}
+        className="inline-block"
+      >
         {children}
       </motion.span>{" "}
     </>

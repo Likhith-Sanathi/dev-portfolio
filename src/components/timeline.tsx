@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDown } from "lucide-react";
-import { AnimatePresence, motion, useScroll } from "motion/react";
+import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import { useRef, useState } from "react";
 
 import type { TimelineEvent } from "@/lib/timeline";
@@ -91,76 +91,105 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
         ref={listRef}
         className="lg:col-span-7 lg:col-start-6 lg:border-t lg:border-ink"
       >
-        {events.map((event, index) => {
-          const isActive = index === active.index;
-
-          return (
-            <motion.li
-              key={event.id}
-              onViewportEnter={() => activate(index)}
-              viewport={{ margin: "-45% 0px -54% 0px" }}
-              className={cn(
-                "border-b border-hairline py-10 transition-opacity duration-500 md:py-14",
-                isActive ? "opacity-100" : "opacity-30 motion-reduce:opacity-100",
-              )}
-            >
-              <div className="flex items-center gap-3 text-sm">
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "size-2 shrink-0 bg-signal transition-opacity duration-300",
-                    isActive ? "opacity-100" : "opacity-0",
-                  )}
-                />
-                <span className="tabular-nums">{event.period}</span>
-                <span className="text-mute">{event.kind}</span>
-              </div>
-              <h3 className="mt-4 text-balance text-[clamp(1.75rem,3.2vw,3rem)] font-semibold leading-none tracking-[-0.04em]">
-                {event.title}
-              </h3>
-              {event.subtitle ? (
-                <p className="mt-3 text-base text-mute md:text-lg">
-                  {event.subtitle}
-                </p>
-              ) : null}
-              {event.body ? (
-                <p className="mt-6 max-w-[62ch] text-base leading-relaxed">
-                  {event.body}
-                </p>
-              ) : null}
-              {event.points ? (
-                <ol className="mt-6 max-w-[62ch] space-y-4 text-mute">
-                  {event.points.map((point, pointIndex) => (
-                    <li key={point} className="flex gap-4">
-                      <span className="w-5 shrink-0 tabular-nums text-ink">
-                        {pad(pointIndex + 1)}
-                      </span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ol>
-              ) : null}
-              {event.topics ? (
-                <p className="mt-6 max-w-[62ch] text-sm leading-relaxed">
-                  <span className="text-mute">Relevant coursework</span>
-                  <br />
-                  {event.topics.join(" / ")}
-                </p>
-              ) : null}
-              {event.href ? (
-                <a
-                  href={event.href}
-                  className="mt-6 inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:text-signal"
-                >
-                  {event.linkLabel}
-                  <ArrowDown className="size-4" strokeWidth={1.75} />
-                </a>
-              ) : null}
-            </motion.li>
-          );
-        })}
+        {events.map((event, index) => (
+          <TimelineItem
+            key={event.id}
+            event={event}
+            isActive={index === active.index}
+            onActivate={() => activate(index)}
+          />
+        ))}
       </ol>
     </div>
+  );
+}
+
+// Milestones swing out to the side the further they sit from the middle of
+// the screen, so the list turns past the reader like a rolodex.
+function TimelineItem({
+  event,
+  isActive,
+  onActivate,
+}: {
+  event: TimelineEvent;
+  isActive: boolean;
+  onActivate: () => void;
+}) {
+  const ref = useRef<HTMLLIElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const x = useTransform(scrollYProgress, (value) => {
+    const distance = (value - 0.5) * 2;
+    return `${distance * distance * 14}vw`;
+  });
+
+  return (
+    <motion.li
+      ref={ref}
+      data-parallax
+      style={{ x }}
+      onViewportEnter={onActivate}
+      viewport={{ margin: "-45% 0px -54% 0px" }}
+      className={cn(
+        "border-b border-hairline py-10 transition-opacity duration-500 md:py-14",
+        isActive ? "opacity-100" : "opacity-30 motion-reduce:opacity-100",
+      )}
+    >
+      <div className="flex items-center gap-3 text-sm">
+        <span
+          aria-hidden="true"
+          className={cn(
+            "size-2 shrink-0 bg-signal transition-opacity duration-300",
+            isActive ? "opacity-100" : "opacity-0",
+          )}
+        />
+        <span className="tabular-nums">{event.period}</span>
+        <span className="text-mute">{event.kind}</span>
+      </div>
+      <h3 className="mt-4 text-balance text-[clamp(1.75rem,3.2vw,3rem)] font-semibold leading-none tracking-[-0.04em]">
+        {event.title}
+      </h3>
+      {event.subtitle ? (
+        <p className="mt-3 text-base text-mute md:text-lg">
+          {event.subtitle}
+        </p>
+      ) : null}
+      {event.body ? (
+        <p className="mt-6 max-w-[62ch] text-base leading-relaxed">
+          {event.body}
+        </p>
+      ) : null}
+      {event.points ? (
+        <ol className="mt-6 max-w-[62ch] space-y-4 text-mute">
+          {event.points.map((point, pointIndex) => (
+            <li key={point} className="flex gap-4">
+              <span className="w-5 shrink-0 tabular-nums text-ink">
+                {pad(pointIndex + 1)}
+              </span>
+              <span>{point}</span>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+      {event.topics ? (
+        <p className="mt-6 max-w-[62ch] text-sm leading-relaxed">
+          <span className="text-mute">Relevant coursework</span>
+          <br />
+          {event.topics.join(" / ")}
+        </p>
+      ) : null}
+      {event.href ? (
+        <a
+          href={event.href}
+          className="mt-6 inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:text-signal"
+        >
+          {event.linkLabel}
+          <ArrowDown className="size-4" strokeWidth={1.75} />
+        </a>
+      ) : null}
+    </motion.li>
   );
 }
 

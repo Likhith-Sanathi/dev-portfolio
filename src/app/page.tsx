@@ -1,8 +1,10 @@
 import { ArrowUp, ArrowUpRight } from "lucide-react";
 
 import { ExpandingSection } from "@/components/expanding-section";
+import { FlyInLines } from "@/components/fly-in-lines";
 import { GridToggle } from "@/components/grid-toggle";
-import { HeroName } from "@/components/hero-name";
+import { HeroStage } from "@/components/hero-stage";
+import { HorizontalGallery } from "@/components/horizontal-gallery";
 import { LenisProvider } from "@/components/lenis-provider";
 import { LocalTime } from "@/components/local-time";
 import { MaskText } from "@/components/mask-text";
@@ -29,18 +31,58 @@ const sections = portfolio.nav.map((item, index) => ({
 const sectionTitle =
   "text-[clamp(2.75rem,6.6vw,7.25rem)] font-semibold leading-[0.92] tracking-[-0.05em]";
 
+const heroMeta = [
+  { label: "Discipline", content: portfolio.role },
+  { label: "Studying", content: portfolio.education[0].institution },
+  {
+    label: "Based in",
+    content: (
+      <>
+        {portfolio.location}
+        <br />
+        <LocalTime className="tabular-nums" /> local time
+      </>
+    ),
+  },
+  {
+    label: "Status",
+    content: (
+      <span className="flex gap-2">
+        <span
+          aria-hidden="true"
+          className="mt-[0.4em] size-2 shrink-0 bg-signal"
+        />
+        {portfolio.availability}
+      </span>
+    ),
+  },
+];
+
 export default function Home() {
   return (
     <MotionProvider>
       <LenisProvider>
         <ScrollProgress />
         <SiteHeader />
-        <main id="top">
-          <HeroSection />
-          <AboutSection />
-          <ProjectsSection />
-          <SkillsSection />
-          <ContactSection />
+        {/* overflow-x-clip here, not on body: body overflow is handed to the
+            viewport, where it doesn't stop sideways parallax widening the page
+            on phones. Clip also keeps the pinned sections working. */}
+        <main id="top" className="relative z-10 overflow-x-clip bg-paper">
+          <HeroStage
+            first={firstName}
+            last={lastName}
+            meta={heroMeta}
+            statement={portfolio.hero}
+          />
+          {/* Everything after the hero is a curtain that slides up over the
+              pinned red stage once its statement has been read. */}
+          <div className="relative z-10 -mt-[100svh] border-t border-ink bg-paper motion-reduce:mt-0">
+            <GlanceSection />
+            <AboutSection />
+            <ProjectsSection />
+            <SkillsSection />
+            <ContactSection />
+          </div>
         </main>
         <SiteFooter />
       </LenisProvider>
@@ -73,55 +115,20 @@ function SiteHeader() {
   );
 }
 
-function HeroSection() {
-  const [education] = portfolio.education;
-
+function GlanceSection() {
   return (
     <section
-      className={cn(
-        frame,
-        "@container overflow-x-clip pb-20 pt-6 md:pb-32 md:pt-8",
-      )}
+      aria-label="At a glance"
+      className={cn(frame, "pb-24 pt-4 md:pb-40 md:pt-5")}
     >
-      <Reveal className={cn(grid, "gap-y-6 text-sm leading-snug")}>
-        <HeroMeta label="Discipline">{portfolio.role}</HeroMeta>
-        <HeroMeta label="Studying">{education.institution}</HeroMeta>
-        <HeroMeta label="Based in">
-          {portfolio.location}
-          <br />
-          <LocalTime className="tabular-nums" /> local time
-        </HeroMeta>
-        <HeroMeta label="Status">
-          <span className="flex gap-2">
-            <span
-              aria-hidden="true"
-              className="mt-[0.4em] size-2 shrink-0 bg-signal"
-            />
-            {portfolio.availability}
-          </span>
-        </HeroMeta>
-      </Reveal>
-
-      <HeroName
-        first={firstName}
-        last={lastName}
-        className="-ml-[0.06em] mt-12 text-[length:min(100cqw/3.4,(100svh_-_15rem)/1.62)] font-semibold leading-[0.8] tracking-[-0.065em] md:mt-14"
-      />
-
-      <Rule className="mt-10 md:mt-14" delay={0.3} />
-
-      <div className={cn(grid, "gap-y-12 pt-6 md:pt-8")}>
-        <Reveal
-          className="col-span-4 md:col-span-9 md:col-start-4 lg:col-span-7 lg:col-start-4"
-          delay={0.35}
-        >
-          <p className="text-pretty text-[clamp(1.5rem,2.7vw,2.75rem)] font-medium leading-[1.1] tracking-[-0.03em]">
-            {portfolio.hero}
-          </p>
-        </Reveal>
+      <div className={cn(grid, "gap-y-10")}>
+        <p className="col-span-4 text-sm font-medium md:col-span-3">
+          <span className="tabular-nums text-signal">00</span>
+          <span className="ml-3">At a glance</span>
+        </p>
         <nav
           aria-label="Index"
-          className="col-span-4 text-sm md:col-span-3 md:row-start-1"
+          className="col-span-4 text-sm md:col-span-3 md:col-start-10"
         >
           <p className="text-mute">Index</p>
           <ol className="mt-3 border-t border-ink">
@@ -140,42 +147,27 @@ function HeroSection() {
         </nav>
       </div>
 
-      {/* The three numbers arrive as a staircase and settle onto one line. */}
+      {/* The three numbers arrive as a steep staircase and settle onto one line. */}
       <dl className={cn(grid, "mt-20 gap-y-10 md:mt-32")}>
         {portfolio.stats.map((stat, index) => (
           <Parallax
             key={stat.label}
-            from={index * 110}
+            from={index * 180}
             to={0}
-            offset={["start end", "start 45%"]}
+            offset={["start end", "start 40%"]}
             className="col-span-4 border-t border-ink pt-3 max-md:transform-none!"
           >
             <dt className="flex justify-between gap-4 text-sm">
               <span>{stat.label}</span>
               <span className="tabular-nums text-mute">{pad(index + 1)}</span>
             </dt>
-            <dd className="mt-8 text-[clamp(3.25rem,6.4vw,6.5rem)] font-semibold leading-[0.85] tracking-[-0.055em] md:mt-14">
+            <dd className="mt-8 text-[clamp(3.5rem,7.2vw,8rem)] font-semibold leading-[0.85] tracking-[-0.055em] md:mt-16">
               {stat.value}
             </dd>
           </Parallax>
         ))}
       </dl>
     </section>
-  );
-}
-
-function HeroMeta({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="col-span-2 md:col-span-3">
-      <p className="text-mute">{label}</p>
-      <div className="mt-1 max-w-[22rem] font-medium">{children}</div>
-    </div>
   );
 }
 
@@ -189,18 +181,37 @@ function SectionHead({
   title: string;
 }) {
   return (
-    <>
+    <div className="relative">
+      {/* A giant chapter numeral drifts down behind the heading. */}
+      <Parallax
+        from={-140}
+        to={260}
+        className="pointer-events-none absolute right-0 top-0 select-none"
+      >
+        <span
+          aria-hidden="true"
+          className="block text-[clamp(9rem,34vw,36rem)] font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/60"
+        >
+          {index}
+        </span>
+      </Parallax>
       <Rule />
-      <div className={cn(grid, "gap-y-10 pt-4 md:pt-5")}>
+      <div className={cn(grid, "relative gap-y-10 pt-4 md:pt-5")}>
         <p className="col-span-4 text-sm font-medium md:col-span-3">
           <span className="tabular-nums text-signal">{index}</span>
           <span className="ml-3">{label}</span>
         </p>
-        <Parallax from={56} to={-56} className="col-span-4 md:col-span-9">
+        <Parallax
+          axis="x"
+          from={320}
+          to={0}
+          offset={["start end", "start 35%"]}
+          className="col-span-4 md:col-span-9"
+        >
           <MaskText text={title} className={sectionTitle} />
         </Parallax>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -235,85 +246,15 @@ function AboutSection() {
 
 function ProjectsSection() {
   return (
-    <section id="projects" className={cn(frame, "pb-24 md:pb-40")}>
-      <SectionHead
-        index="02"
-        label={sections[1].label}
-        title="Built across systems and markets."
-      />
-
-      <div className="mt-16 flex items-baseline justify-between pb-3 text-sm md:mt-24">
-        <span>Selected projects</span>
-        <span className="tabular-nums text-mute">
-          ({pad(portfolio.projects.length)})
-        </span>
+    <section id="projects" className="pb-24 md:pb-40">
+      <div className={cn(frame, "pb-16 md:pb-24")}>
+        <SectionHead
+          index="02"
+          label={sections[1].label}
+          title="Built across systems and markets."
+        />
       </div>
-      {/* On tall enough desktops the cards pin and stack like an index file,
-          each leaving its tab strip showing above the next. */}
-      <ol className="border-b border-ink">
-        {portfolio.projects.map((project, index) => (
-          <li
-            key={project.title}
-            id={`project-${pad(index + 1)}`}
-            className="bg-paper [@media(min-width:64rem)_and_(min-height:44rem)]:sticky"
-            style={{ top: `calc(3.5rem + ${index} * 3rem)` }}
-          >
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${project.title}, view on GitHub`}
-              className="group relative block border-t border-ink focus-visible:outline-offset-[-2px]"
-            >
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-0 -top-px h-[3px] origin-left scale-x-0 bg-signal transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
-              />
-              <div className="flex h-12 items-center gap-4 text-sm">
-                <span className="w-8 shrink-0 font-medium tabular-nums transition-colors duration-200 group-hover:text-signal">
-                  {pad(index + 1)}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-mute">
-                  {project.type}
-                </span>
-                <span className="shrink-0 tabular-nums text-mute">
-                  <span className="md:hidden">{project.year}</span>
-                  <span className="hidden md:inline">{project.period}</span>
-                </span>
-              </div>
-              <div className={cn(grid, "gap-y-5 pb-8 pt-2 md:pb-12")}>
-                <h3 className="col-span-4 text-balance text-[clamp(2rem,3.6vw,3.5rem)] font-semibold leading-[0.95] tracking-[-0.045em] md:col-span-6">
-                  {project.title}
-                </h3>
-                <div className="col-span-4 md:col-span-4">
-                  <p className="text-base leading-relaxed">
-                    {project.description}
-                  </p>
-                  <p className="mt-5 flex gap-3 text-base font-medium leading-snug">
-                    <span
-                      aria-hidden="true"
-                      className="mt-[0.45em] size-2 shrink-0 bg-signal"
-                    />
-                    {project.impact}
-                  </p>
-                  <p className="mt-5 text-sm text-mute">
-                    {project.tags.join(" / ")}
-                  </p>
-                </div>
-                <div className="col-span-4 flex items-end md:col-span-2 md:justify-end">
-                  <span className="inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 group-hover:text-signal">
-                    GitHub
-                    <ArrowUpRight
-                      className="size-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                      strokeWidth={1.75}
-                    />
-                  </span>
-                </div>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ol>
+      <HorizontalGallery projects={portfolio.projects} />
     </section>
   );
 }
@@ -344,9 +285,10 @@ function ContactSection() {
           <span className="ml-3">{sections[3].label}</span>
         </p>
 
-        <h2 className="mt-16 max-w-[13ch] text-[clamp(3rem,8.6vw,9.5rem)] font-semibold leading-[0.9] tracking-[-0.055em] md:mt-28">
-          Open to internships and ambitious technical work.
-        </h2>
+        <FlyInLines
+          lines={["Open to", "internships", "and ambitious", "technical work."]}
+          className="mt-16 text-[clamp(3rem,11vw,11.5rem)] font-semibold leading-[0.88] tracking-[-0.055em] md:mt-28"
+        />
 
         <div className={cn(grid, "mt-20 items-end gap-y-12 md:mt-32")}>
           <div className="col-span-4 md:col-span-8">
@@ -386,9 +328,10 @@ function ContactSection() {
   );
 }
 
+// Sits under the page and is uncovered as the last section scrolls away.
 function SiteFooter() {
   return (
-    <footer className="bg-ink text-paper">
+    <footer className="sticky bottom-0 z-0 bg-ink text-paper">
       <div className={cn(frame, grid, "gap-y-3 py-6 text-sm")}>
         <p className="col-span-4 md:col-span-3">
           © 2026 {portfolio.name}
