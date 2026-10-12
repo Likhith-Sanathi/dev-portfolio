@@ -188,19 +188,7 @@ function GlanceSection() {
               <span className="tabular-nums text-mute">{pad(index + 1)}</span>
             </dt>
             <dd className="mt-8 text-display font-semibold leading-[0.85] tracking-[-0.055em] md:mt-16">
-              {/* A result is set as words rather than counted, so it has no dot grid. */}
-              {"note" in stat ? (
-                <>
-                  <span className="block text-title leading-[0.95] tracking-[-0.05em]">
-                    {stat.value}
-                  </span>
-                  <p className="mt-6 max-w-[38ch] text-base font-normal leading-relaxed tracking-normal md:mt-8">
-                    {stat.note}
-                  </p>
-                </>
-              ) : (
-                <StatFigure value={stat.value} />
-              )}
+              <StatFigure value={stat.value} />
             </dd>
           </Parallax>
         ))}

@@ -22,11 +22,7 @@ export const portfolio = {
   ],
   stats: [
     { value: "1st / 40", label: "Intervarsity CTF finish" },
-    {
-      value: "5th Place",
-      label: "ZeroDays",
-      note: "Placed 5th overall in the Open category at one of the world's largest in-person Capture The Flag events.",
-    },
+    { value: "5th / 163", label: "ZeroDays" },
     { value: "Top 0.8%", label: "PicoCTF worldwide" },
   ],
   education: [
