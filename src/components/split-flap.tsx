@@ -75,7 +75,8 @@ function FlapCell({
               <motion.span
                 key={`fall-${flip.count}`}
                 initial={{ rotateX: 0 }}
-                animate={{ rotateX: -90 }}
+                // Hidden once edge-on, where it would rasterise as a sliver.
+                animate={{ rotateX: -90, transitionEnd: { visibility: "hidden" } }}
                 transition={{ duration: 0.16, delay, ease: "easeIn" }}
                 className="absolute inset-x-0 top-0 h-1/2 origin-bottom bg-inherit [backface-visibility:hidden]"
               >
@@ -83,9 +84,16 @@ function FlapCell({
               </motion.span>
               <motion.span
                 key={`land-${flip.count}`}
-                initial={{ rotateX: 90 }}
-                animate={{ rotateX: 0 }}
-                transition={{ duration: 0.2, delay: delay + 0.16, ease: "easeOut" }}
+                // Invisible while it waits edge-on for the top half to fall.
+                initial={{ rotateX: 90, opacity: 0 }}
+                animate={{ rotateX: 0, opacity: 1 }}
+                transition={{
+                  duration: 0.2,
+                  delay: delay + 0.16,
+                  ease: "easeOut",
+                  // Appears the instant it starts to swing down, not by fading.
+                  opacity: { duration: 0, delay: delay + 0.16 },
+                }}
                 className="absolute inset-x-0 bottom-0 h-1/2 origin-top bg-inherit [backface-visibility:hidden]"
               >
                 <Face side="bottom" character={flip.current} />
