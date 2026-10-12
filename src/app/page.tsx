@@ -5,7 +5,6 @@ import { ChapterNumeral } from "@/components/chapter-numeral";
 import { FlyInLines } from "@/components/fly-in-lines";
 import { FooterReveal } from "@/components/footer-reveal";
 import { GridFill } from "@/components/grid-fill";
-import { GridLines } from "@/components/grid-lines";
 import { GridToggle } from "@/components/grid-toggle";
 import { HeroStage } from "@/components/hero-stage";
 import { HorizontalGallery } from "@/components/horizontal-gallery";
@@ -222,7 +221,6 @@ function SectionHead({
 }) {
   return (
     <div className="relative">
-      <GridLines />
       {/* A giant chapter numeral slams into place, then drifts down behind
           the heading. */}
       <Parallax
