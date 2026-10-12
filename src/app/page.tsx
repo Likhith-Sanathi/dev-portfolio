@@ -19,7 +19,6 @@ import { Parallax } from "@/components/parallax";
 import { Reassemble } from "@/components/reassemble";
 import { ReplayIntro } from "@/components/replay-intro";
 import { RewindLink } from "@/components/rewind-link";
-import { RouteRail } from "@/components/route-rail";
 import { Reveal, Rule } from "@/components/reveal";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { ScrambleText } from "@/components/scramble-text";
@@ -43,8 +42,6 @@ const sections = portfolio.nav.map((item, index) => ({
   ...item,
   index: pad(index + 1),
 }));
-
-const stations = [{ href: "#top", label: "Introduction", index: "00" }, ...sections];
 
 const sectionTitle =
   "text-[clamp(2.75rem,6.6vw,7.25rem)] font-semibold leading-[0.92] tracking-[-0.05em]";
@@ -85,7 +82,6 @@ export default function Home() {
         <SkipLink target="about">Skip the intro</SkipLink>
         <ScrollProgress />
         <CursorFollower />
-        <RouteRail stations={stations} />
         <SiteHeader />
         {/* overflow-x-clip here, not on body: body overflow is handed to the
             viewport, where it doesn't stop sideways parallax widening the page
@@ -102,7 +98,6 @@ export default function Home() {
               pinned red stage once its statement has been read. */}
           <div className="relative z-10 -mt-[100svh] border-t border-ink bg-paper calm:mt-0">
             <GlanceSection />
-            <TickerCross />
             <AboutSection />
             <ProjectTicker />
             <ProjectsSection />
@@ -201,35 +196,6 @@ function GlanceSection() {
         ))}
       </dl>
     </section>
-  );
-}
-
-// Two railway tickers crossing in an X: availability one way, results the
-// other. Both pick up speed and turn round with the scroll.
-function TickerCross() {
-  const status = [portfolio.availability, portfolio.location, portfolio.role];
-  const results = portfolio.stats.map((stat) => `${stat.value} ${stat.label}`);
-
-  return (
-    <div
-      aria-hidden="true"
-      className="relative h-[clamp(10rem,22vw,18rem)] overflow-hidden"
-    >
-      <div className="absolute inset-x-[-10%] top-1/2 -translate-y-1/2 -rotate-[4deg]">
-        <Ticker
-          items={status}
-          className="bg-ink py-3 text-[clamp(1.5rem,3.2vw,2.75rem)] font-semibold tracking-[-0.03em] text-paper md:py-4"
-        />
-      </div>
-      <div className="absolute inset-x-[-10%] top-1/2 -translate-y-1/2 rotate-[3deg]">
-        <Ticker
-          items={results}
-          direction={-1}
-          speed={55}
-          className="bg-signal py-3 text-[clamp(1.5rem,3.2vw,2.75rem)] font-semibold tracking-[-0.03em] text-white md:py-4"
-        />
-      </div>
-    </div>
   );
 }
 

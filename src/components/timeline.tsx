@@ -1,20 +1,26 @@
 "use client";
 
 import { ArrowDown } from "lucide-react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import { memo, useCallback, useRef, useState } from "react";
 
 import { ScrambleText } from "@/components/scramble-text";
-import { SplitFlap } from "@/components/split-flap";
 import type { TimelineEvent } from "@/lib/timeline";
 import { cn, pad } from "@/lib/utils";
 
-// A chronological story. The year stays pinned beside the events on a
-// split-flap board and flips over as each milestone crosses the middle of
-// the screen.
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const roll = {
+  enter: (direction: number) => ({ y: direction > 0 ? "100%" : "-100%" }),
+  center: { y: "0%" },
+  exit: (direction: number) => ({ y: direction > 0 ? "-100%" : "100%" }),
+};
+
+// A chronological story. The year stays pinned beside the events and rolls
+// over, digit by digit, as each milestone crosses the middle of the screen.
 export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
   const listRef = useRef<HTMLOListElement>(null);
-  const [active, setActive] = useState({ index: 0 });
+  const [active, setActive] = useState({ index: 0, direction: 1 });
   const { scrollYProgress } = useScroll({
     target: listRef,
     offset: ["start center", "end center"],
@@ -26,7 +32,11 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
   // Stable, so a change of milestone re-renders only the two items whose
   // state changed rather than the whole drum.
   const activate = useCallback((index: number) => {
-    setActive((previous) => (previous.index === index ? previous : { index }));
+    setActive((previous) =>
+      previous.index === index
+        ? previous
+        : { index, direction: index > previous.index ? 1 : -1 },
+    );
   }, []);
 
   return (
@@ -37,20 +47,16 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
       >
         <div className="flex items-end justify-between gap-4 lg:block">
           <div>
-            <p className="hidden items-center justify-between text-sm lg:flex">
+            <p className="hidden justify-between text-sm lg:flex">
               <span>Milestone</span>
-              <span className="flex items-center gap-1.5 tabular-nums text-mute">
-                <SplitFlap
-                  value={pad(active.index + 1)}
-                  cellClassName="bg-ink text-paper"
-                />
-                / {pad(events.length)}
+              <span className="tabular-nums text-mute">
+                {pad(active.index + 1)} / {pad(events.length)}
               </span>
             </p>
-            <SplitFlap
-              value={current.year}
-              cellClassName="bg-ink text-paper"
-              className="text-5xl font-semibold tracking-[-0.04em] lg:mt-6 lg:text-[clamp(4.5rem,12.5vw,13rem)]"
+            <RollingYear
+              year={current.year}
+              direction={active.direction}
+              className="text-5xl font-semibold tracking-[-0.06em] lg:mt-6 lg:text-[clamp(5rem,14.5vw,15rem)]"
             />
           </div>
           <div className="text-right text-sm lg:mt-6 lg:text-left">
@@ -204,3 +210,43 @@ const TimelineItem = memo(function TimelineItem({
     </motion.li>
   );
 });
+
+function RollingYear({
+  year,
+  direction,
+  className,
+}: {
+  year: string;
+  direction: number;
+  className?: string;
+}) {
+  return (
+    <span className={cn("flex leading-[0.85] tabular-nums", className)}>
+      {year.split("").map((digit, index) => (
+        <span
+          key={index}
+          className="relative -my-[0.06em] inline-block overflow-hidden py-[0.06em]"
+        >
+          <AnimatePresence
+            mode="popLayout"
+            initial={false}
+            custom={direction}
+          >
+            <motion.span
+              key={digit}
+              custom={direction}
+              variants={roll}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.55, delay: index * 0.04, ease }}
+              className="inline-block"
+            >
+              {digit}
+            </motion.span>
+          </AnimatePresence>
+        </span>
+      ))}
+    </span>
+  );
+}
