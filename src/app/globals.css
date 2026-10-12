@@ -140,3 +140,10 @@
     font-weight: 600 !important;
   }
 }
+
+/* The red square stands in for the system pointer while it is running
+   (CursorFollower sets this only for a mouse, with motion on). */
+[data-custom-cursor],
+[data-custom-cursor] * {
+  cursor: none;
+}

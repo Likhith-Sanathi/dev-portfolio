@@ -18,7 +18,8 @@ const shapes: Record<Mode, { size: number; fill: boolean }> = {
 
 // A red square that trails the pointer, opens into an outline over links and
 // into a "View" tile over project panels. A thin paper-coloured ring keeps it visible
-// on the red sections. The real cursor stays; this only follows it.
+// on the red sections. It replaces the system cursor, which is hidden while it
+// runs; touch and calm visitors keep their own cursor.
 export function CursorFollower() {
   const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)", false);
   const calm = useCalm();
@@ -33,6 +34,9 @@ export function CursorFollower() {
     if (!enabled) {
       return;
     }
+
+    const root = document.documentElement;
+    root.dataset.customCursor = "";
 
     function onMove(event: PointerEvent) {
       if (event.pointerType !== "mouse") {
@@ -64,6 +68,7 @@ export function CursorFollower() {
     document.addEventListener("pointerover", onOver, { passive: true });
     document.documentElement.addEventListener("pointerleave", onLeave);
     return () => {
+      delete root.dataset.customCursor;
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerover", onOver);
       document.documentElement.removeEventListener("pointerleave", onLeave);
