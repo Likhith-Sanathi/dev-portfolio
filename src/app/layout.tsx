@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     siteName: "Likhith Sanathi Portfolio",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/social-preview.png",
         width: 1200,
         height: 630,
         alt: "Likhith Sanathi developer portfolio preview",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "Likhith Sanathi - Developer Portfolio",
     description:
       "Computer science student portfolio with projects, experience, achievements, and technical skills.",
-    images: ["/twitter-image"],
+    images: ["/social-preview.png"],
   },
 };
 
