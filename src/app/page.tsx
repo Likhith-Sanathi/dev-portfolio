@@ -4,6 +4,7 @@ import { CursorFollower } from "@/components/cursor-follower";
 import { ChapterNumeral } from "@/components/chapter-numeral";
 import { FlyInLines } from "@/components/fly-in-lines";
 import { FooterReveal } from "@/components/footer-reveal";
+import { GridFill } from "@/components/grid-fill";
 import { GridLines } from "@/components/grid-lines";
 import { GridToggle } from "@/components/grid-toggle";
 import { HeroStage } from "@/components/hero-stage";
@@ -16,7 +17,6 @@ import { MaskText } from "@/components/mask-text";
 import { MotionProvider } from "@/components/motion-provider";
 import { MotionToggle } from "@/components/motion-toggle";
 import { Parallax } from "@/components/parallax";
-import { Reassemble } from "@/components/reassemble";
 import { ReplayIntro } from "@/components/replay-intro";
 import { RewindLink } from "@/components/rewind-link";
 import { Reveal, Rule } from "@/components/reveal";
@@ -102,7 +102,7 @@ export default function Home() {
             <ProjectTicker />
             <ProjectsSection />
             <SkillsSection />
-            <Reassemble />
+            <GridFill />
             <ContactSection />
           </div>
         </main>
