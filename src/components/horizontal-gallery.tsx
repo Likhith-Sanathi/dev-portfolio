@@ -113,6 +113,7 @@ export function HorizontalGallery({
               horizontal={enabled}
               trackX={x}
               panelWidth={metrics.panel}
+              trackDistance={metrics.distance}
             />
           ))}
         </motion.ol>
@@ -144,17 +145,23 @@ function Panel({
   horizontal,
   trackX,
   panelWidth,
+  trackDistance,
 }: {
   project: Project;
   index: number;
   horizontal: boolean;
   trackX: MotionValue<number>;
   panelWidth: number;
+  trackDistance: number;
 }) {
   // The numeral outruns its panel by half again, so it races in from the right
-  // as the panel arrives and is clipped away while it leaves.
+  // as the panel arrives and is clipped away while it leaves. It settles where
+  // the track stops for this panel, so the last numeral lands whole even
+  // though its panel never reaches the left edge.
   const numeralX = useTransform(trackX, (value) =>
-    horizontal ? (index * panelWidth + value) * 0.5 : 0,
+    horizontal
+      ? (Math.min(index * panelWidth, trackDistance) + value) * 0.5
+      : 0,
   );
 
   return (
@@ -176,10 +183,12 @@ function Panel({
       )}
     >
       {horizontal ? (
+        // Right-aligned with the date above it, so the panel's padding leaves
+        // room for the last digit's curve instead of clipping it.
         <motion.span
           aria-hidden="true"
           style={{ x: numeralX }}
-          className="pointer-events-none absolute -right-[0.04em] top-6 select-none text-giant font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/70"
+          className="pointer-events-none absolute right-5 top-6 select-none text-giant font-semibold leading-[0.75] tracking-[-0.07em] text-hairline/70 md:right-8"
         >
           {pad(index + 1)}
         </motion.span>
