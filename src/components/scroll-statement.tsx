@@ -12,7 +12,7 @@ import { grid } from "@/lib/grid";
 import { cn } from "@/lib/utils";
 
 // Pins a statement to the viewport and inks it in word by word, each word
-// rising into place, so it is read at the pace of the scroll. Reduced-motion
+// flipping up into place, so it is read at the pace of the scroll. Reduced-motion
 // visitors get the plain paragraph without the pinned runway (globals.css).
 export function ScrollStatement({
   label,
@@ -67,14 +67,19 @@ function Word({
     Math.min(1, Math.max(0, (value - range[0]) / (range[1] - range[0]))),
   );
   const opacity = useTransform(t, (value) => 0.14 + 0.86 * value);
-  const y = useTransform(t, (value) => `${(1 - value) * 0.45}em`);
+  // Each word stands up from lying flat, hinged on its baseline, like a flap
+  // on a departure board. No perspective once upright keeps the text crisp.
+  const rotateX = useTransform(t, (value) => (1 - value) * 88);
+  const transformPerspective = useTransform(t, (value) =>
+    value > 0.995 ? 0 : 700,
+  );
 
   return (
     <>
       <motion.span
         data-parallax
         data-scroll-fade
-        style={{ opacity, y }}
+        style={{ opacity, rotateX, transformPerspective, originY: 1 }}
         className="inline-block"
       >
         {children}

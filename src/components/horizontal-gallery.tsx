@@ -156,10 +156,24 @@ function Panel({
   const numeralX = useTransform(trackX, (value) =>
     horizontal ? (index * panelWidth + value) * 0.5 : 0,
   );
+  // Panels swing in like doors hinged on their left edge, flat by the time
+  // they reach the left of the screen.
+  const rotateY = useTransform(trackX, (value) => {
+    if (!horizontal || panelWidth === 0) {
+      return 0;
+    }
+    const position = (index * panelWidth + value) / (panelWidth * 1.15);
+    return -Math.min(1, Math.max(0, position)) * 52;
+  });
+  const transformPerspective = useTransform(rotateY, (value) =>
+    Math.abs(value) < 0.05 ? 0 : 1600,
+  );
 
   return (
-    <li
+    <motion.li
       id={horizontal ? undefined : `project-${pad(index + 1)}`}
+      data-parallax
+      style={{ rotateY, transformPerspective, originX: 0 }}
       className={cn(
         "relative",
         horizontal
@@ -182,6 +196,7 @@ function Panel({
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`${project.title}, view on GitHub`}
+        data-cursor="view"
         className={cn(
           "group relative flex flex-col focus-visible:outline-offset-[-2px]",
           horizontal ? "h-full" : "py-8",
@@ -227,6 +242,6 @@ function Panel({
           </div>
         </div>
       </a>
-    </li>
+    </motion.li>
   );
 }

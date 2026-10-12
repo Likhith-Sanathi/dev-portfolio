@@ -1,12 +1,17 @@
 import { ArrowUp, ArrowUpRight } from "lucide-react";
 
+import { CountStat } from "@/components/count-stat";
+import { CursorFollower } from "@/components/cursor-follower";
 import { ExpandingSection } from "@/components/expanding-section";
 import { FlyInLines } from "@/components/fly-in-lines";
+import { FooterReveal } from "@/components/footer-reveal";
 import { GridToggle } from "@/components/grid-toggle";
 import { HeroStage } from "@/components/hero-stage";
 import { HorizontalGallery } from "@/components/horizontal-gallery";
+import { InvertSection } from "@/components/invert-section";
 import { LenisProvider } from "@/components/lenis-provider";
 import { LocalTime } from "@/components/local-time";
+import { Magnetic } from "@/components/magnetic";
 import { MaskText } from "@/components/mask-text";
 import { MotionProvider } from "@/components/motion-provider";
 import { Parallax } from "@/components/parallax";
@@ -15,6 +20,7 @@ import { ScrollProgress } from "@/components/scroll-progress";
 import { ScrollStatement } from "@/components/scroll-statement";
 import { SectionNav } from "@/components/section-nav";
 import { SkillRows } from "@/components/skill-rows";
+import { SpinningMark } from "@/components/spinning-mark";
 import { Timeline } from "@/components/timeline";
 import { frame, grid } from "@/lib/grid";
 import { portfolio } from "@/lib/portfolio-content";
@@ -63,6 +69,7 @@ export default function Home() {
     <MotionProvider>
       <LenisProvider>
         <ScrollProgress />
+        <CursorFollower />
         <SiteHeader />
         {/* overflow-x-clip here, not on body: body overflow is handed to the
             viewport, where it doesn't stop sideways parallax widening the page
@@ -84,7 +91,9 @@ export default function Home() {
             <ContactSection />
           </div>
         </main>
-        <SiteFooter />
+        <FooterReveal name={portfolio.name}>
+          <FooterBar />
+        </FooterReveal>
       </LenisProvider>
     </MotionProvider>
   );
@@ -99,7 +108,7 @@ function SiteHeader() {
           className="col-span-3 flex items-center gap-2.5 font-semibold tracking-[-0.01em]"
           aria-label={`${portfolio.name}, back to top`}
         >
-          <span aria-hidden="true" className="size-3 shrink-0 bg-signal" />
+          <SpinningMark />
           {portfolio.name}
         </a>
         <SectionNav sections={sections} />
@@ -147,7 +156,8 @@ function GlanceSection() {
         </nav>
       </div>
 
-      {/* The three numbers arrive as a steep staircase and settle onto one line. */}
+      {/* The three numbers arrive as a steep staircase, counting as they
+          come, and settle onto one line. */}
       <dl className={cn(grid, "mt-20 gap-y-10 md:mt-32")}>
         {portfolio.stats.map((stat, index) => (
           <Parallax
@@ -162,7 +172,7 @@ function GlanceSection() {
               <span className="tabular-nums text-mute">{pad(index + 1)}</span>
             </dt>
             <dd className="mt-8 text-[clamp(3.5rem,7.2vw,8rem)] font-semibold leading-[0.85] tracking-[-0.055em] md:mt-16">
-              {stat.value}
+              <CountStat value={stat.value} />
             </dd>
           </Parallax>
         ))}
@@ -186,6 +196,7 @@ function SectionHead({
       <Parallax
         from={-140}
         to={260}
+        lean={10}
         className="pointer-events-none absolute right-0 top-0 select-none"
       >
         <span
@@ -205,6 +216,7 @@ function SectionHead({
           axis="x"
           from={320}
           to={0}
+          lean={7}
           offset={["start end", "start 35%"]}
           className="col-span-4 md:col-span-9"
         >
@@ -261,7 +273,7 @@ function ProjectsSection() {
 
 function SkillsSection() {
   return (
-    <section id="skills" className="pb-24 md:pb-40">
+    <InvertSection id="skills" className="pb-24 md:pb-40">
       <div className={frame}>
         <SectionHead
           index="03"
@@ -272,7 +284,7 @@ function SkillsSection() {
       <div className="mt-16 md:mt-24">
         <SkillRows groups={portfolio.skillGroups} />
       </div>
-    </section>
+    </InvertSection>
   );
 }
 
@@ -293,31 +305,35 @@ function ContactSection() {
         <div className={cn(grid, "mt-20 items-end gap-y-12 md:mt-32")}>
           <div className="col-span-4 md:col-span-8">
             <p className="text-sm">Write to</p>
-            <a
-              href={`mailto:${portfolio.email}`}
-              className="mt-3 inline-block text-[clamp(1.5rem,4.4vw,4.5rem)] font-semibold leading-none tracking-[-0.04em] underline decoration-white/40 decoration-[0.05em] underline-offset-[0.16em] transition-colors duration-200 [overflow-wrap:anywhere] hover:decoration-white focus-visible:outline-white"
-            >
-              {portfolio.email}
-            </a>
+            <Magnetic className="mt-3" strength={0.22}>
+              <a
+                href={`mailto:${portfolio.email}`}
+                className="inline-block text-[clamp(1.5rem,4.4vw,4.5rem)] font-semibold leading-none tracking-[-0.04em] underline decoration-white/40 decoration-[0.05em] underline-offset-[0.16em] transition-colors duration-200 [overflow-wrap:anywhere] hover:decoration-white focus-visible:outline-white"
+              >
+                {portfolio.email}
+              </a>
+            </Magnetic>
           </div>
           <ul className="col-span-4 border-b border-white/60 text-base font-medium md:col-span-3 md:col-start-10">
             {portfolio.socials.map((social) => {
               const isMail = social.href.startsWith("mailto:");
 
               return (
-                <li key={social.label}>
-                  <a
-                    href={social.href}
-                    target={isMail ? undefined : "_blank"}
-                    rel={isMail ? undefined : "noopener noreferrer"}
-                    className="group flex items-center justify-between border-t border-white/60 py-3 focus-visible:outline-white"
-                  >
-                    {social.label}
-                    <ArrowUpRight
-                      className="size-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                      strokeWidth={1.75}
-                    />
-                  </a>
+                <li key={social.label} className="border-t border-white/60">
+                  <Magnetic className="w-full" strength={0.12}>
+                    <a
+                      href={social.href}
+                      target={isMail ? undefined : "_blank"}
+                      rel={isMail ? undefined : "noopener noreferrer"}
+                      className="group flex items-center justify-between py-3 focus-visible:outline-white"
+                    >
+                      {social.label}
+                      <ArrowUpRight
+                        className="size-5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                        strokeWidth={1.75}
+                      />
+                    </a>
+                  </Magnetic>
                 </li>
               );
             })}
@@ -328,31 +344,27 @@ function ContactSection() {
   );
 }
 
-// Sits under the page and is uncovered as the last section scrolls away.
-function SiteFooter() {
+// The top bar of the end credits; the reveal adds the giant name below it.
+function FooterBar() {
   return (
-    <footer className="sticky bottom-0 z-0 bg-ink text-paper">
-      <div className={cn(frame, grid, "gap-y-3 py-6 text-sm")}>
-        <p className="col-span-4 md:col-span-3">
-          © 2026 {portfolio.name}
-        </p>
-        <p className="col-span-4 text-paper/60 md:col-span-3">
-          {portfolio.location}, <LocalTime className="tabular-nums" />
-        </p>
-        <p className="col-span-4 text-paper/60 md:col-span-3">
-          Set in Geist on a 12-column grid.
-        </p>
-        <div className="col-span-4 mt-3 flex items-center justify-between gap-6 md:col-span-3 md:mt-0 md:justify-end">
-          <GridToggle className="focus-visible:outline-paper" />
-          <a
-            href="#top"
-            className="inline-flex items-center gap-1 transition-colors duration-200 hover:text-signal focus-visible:outline-paper"
-          >
-            Top
-            <ArrowUp className="size-4" strokeWidth={1.75} />
-          </a>
-        </div>
+    <div className={cn(frame, grid, "gap-y-3 py-6 text-sm")}>
+      <p className="col-span-4 md:col-span-3">© 2026 {portfolio.name}</p>
+      <p className="col-span-4 text-paper/60 md:col-span-3">
+        {portfolio.location}, <LocalTime className="tabular-nums" />
+      </p>
+      <p className="col-span-4 text-paper/60 md:col-span-3">
+        Set in Geist on a 12-column grid.
+      </p>
+      <div className="col-span-4 mt-3 flex items-center justify-between gap-6 md:col-span-3 md:mt-0 md:justify-end">
+        <GridToggle className="focus-visible:outline-paper" />
+        <a
+          href="#top"
+          className="inline-flex items-center gap-1 transition-colors duration-200 hover:text-signal focus-visible:outline-paper"
+        >
+          Top
+          <ArrowUp className="size-4" strokeWidth={1.75} />
+        </a>
       </div>
-    </footer>
+    </div>
   );
 }

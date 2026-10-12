@@ -104,8 +104,9 @@ export function Timeline({ events }: { events: readonly TimelineEvent[] }) {
   );
 }
 
-// Milestones swing out to the side the further they sit from the middle of
-// the screen, so the list turns past the reader like a rolodex.
+// Milestones sit on a drum: each tips back the further it is from the middle
+// of the screen and shrinks slightly, so the list turns past the reader like
+// a rolodex.
 function TimelineItem({
   event,
   isActive,
@@ -120,16 +121,24 @@ function TimelineItem({
     target: ref,
     offset: ["start end", "end start"],
   });
-  const x = useTransform(scrollYProgress, (value) => {
-    const distance = (value - 0.5) * 2;
-    return `${distance * distance * 14}vw`;
+  const rotateX = useTransform(scrollYProgress, (value) => {
+    const distance = Math.max(-1, Math.min(1, (value - 0.5) * 2));
+    return distance * 58;
   });
+  const scale = useTransform(scrollYProgress, (value) => {
+    const distance = Math.min(1, Math.abs((value - 0.5) * 2));
+    return 1 - distance * distance * 0.14;
+  });
+  // Perspective only while tilted, so an upright milestone renders crisp.
+  const transformPerspective = useTransform(rotateX, (value) =>
+    Math.abs(value) < 0.05 ? 0 : 1100,
+  );
 
   return (
     <motion.li
       ref={ref}
       data-parallax
-      style={{ x }}
+      style={{ rotateX, scale, transformPerspective }}
       onViewportEnter={onActivate}
       viewport={{ margin: "-45% 0px -54% 0px" }}
       className={cn(

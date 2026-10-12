@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  motion,
-  useScroll,
-  useSpring,
-  useTransform,
-  useVelocity,
-  type MotionValue,
-} from "motion/react";
+import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
+import { useLean } from "@/components/scroll-velocity";
 import { frame } from "@/lib/grid";
 import { cn, pad } from "@/lib/utils";
 
@@ -26,14 +20,7 @@ export function SkillRows({
 }: {
   groups: readonly { title: string; items: readonly string[] }[];
 }) {
-  const { scrollY } = useScroll();
-  const velocity = useSpring(useVelocity(scrollY), {
-    damping: 50,
-    stiffness: 300,
-  });
-  const skewX = useTransform(velocity, (value) =>
-    Math.max(-14, Math.min(14, value / -160)),
-  );
+  const skewX = useLean(16);
 
   return (
     <div>
