@@ -18,6 +18,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
         easing: (t) => Math.min(1, 1.001 - 2 ** (-10 * t)),
         smoothWheel: true,
         wheelMultiplier: 0.8,
+        anchors: { offset: -56 },
       }}
     >
       {children}
